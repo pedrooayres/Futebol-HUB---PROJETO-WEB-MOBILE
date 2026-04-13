@@ -1,0 +1,400 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
+const initialForm = {
+  playerName: "",
+  club: "",
+  position: "",
+  rating: "80",
+  status: "Em observacao",
+  notes: ""
+};
+
+function getStatValue(stats, key) {
+  return stats?.find((item) => item.name === key)?.displayValue || "--";
+}
+
+export default function HomePage() {
+  const [form, setForm] = useState(initialForm);
+  const [items, setItems] = useState([]);
+  const [table, setTable] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [loadingCrud, setLoadingCrud] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [backStatus, setBackStatus] = useState("");
+
+  async function loadItems() {
+    setLoadingCrud(true);
+    const response = await fetch("/api/scouting");
+    const data = await response.json();
+
+    setItems(data.items || []);
+    setBackStatus(data.message || "");
+    setLoadingCrud(false);
+  }
+
+  async function loadStandings() {
+    const response = await fetch("/api/standings");
+    const data = await response.json();
+    setTable(data.rows || []);
+  }
+
+  useEffect(() => {
+    loadItems();
+    loadStandings();
+  }, []);
+
+  const kpis = useMemo(() => {
+    const approved = items.filter((item) => item.status === "Aprovado").length;
+    const average =
+      items.length > 0
+        ? (items.reduce((sum, item) => sum + Number(item.rating || 0), 0) / items.length).toFixed(1)
+        : "0.0";
+
+    return [
+      { label: "Jogadores monitorados", value: String(items.length).padStart(2, "0") },
+      { label: "Aprovados para contato", value: String(approved).padStart(2, "0") },
+      { label: "Media tecnica", value: average }
+    ];
+  }, [items]);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setSaving(true);
+    setMessage("");
+
+    const endpoint = editingId ? `/api/scouting/${editingId}` : "/api/scouting";
+    const method = editingId ? "PUT" : "POST";
+
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(form)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data.message || "Nao foi possivel salvar.");
+      setSaving(false);
+      return;
+    }
+
+    setForm(initialForm);
+    setEditingId(null);
+    setMessage(editingId ? "Observacao atualizada com sucesso." : "Observacao criada com sucesso.");
+    setSaving(false);
+    await loadItems();
+  }
+
+  function handleEdit(item) {
+    setEditingId(item.objectId);
+    setForm({
+      playerName: item.playerName || "",
+      club: item.club || "",
+      position: item.position || "",
+      rating: String(item.rating || 80),
+      status: item.status || "Em observacao",
+      notes: item.notes || ""
+    });
+  }
+
+  async function handleDelete(id) {
+    setMessage("");
+
+    const response = await fetch(`/api/scouting/${id}`, {
+      method: "DELETE"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data.message || "Nao foi possivel excluir.");
+      return;
+    }
+
+    if (editingId === id) {
+      setForm(initialForm);
+      setEditingId(null);
+    }
+
+    setMessage("Observacao removida com sucesso.");
+    await loadItems();
+  }
+
+  return (
+    <main className="page-shell">
+      <section className="hero">
+        <div className="hero-copy">
+          <span className="eyebrow">Scouting Platform</span>
+          <h1>Futebol HUB</h1>
+          <p>
+            Um painel moderno para acompanhar tendencias do futebol, avaliar atletas e manter um
+            CRUD de scouting conectado ao Back4App.
+          </p>
+
+          <div className="hero-actions">
+            <a href="#crud" className="primary-button">
+              Abrir central de observacao
+            </a>
+            <a href="#ranking" className="ghost-button">
+              Ver ranking externo
+            </a>
+          </div>
+        </div>
+
+        <div className="hero-card">
+          <p className="card-label">Match Intelligence</p>
+          <div className="metric-stack">
+            {kpis.map((item) => (
+              <div key={item.label} className="metric-card">
+                <strong>{item.value}</strong>
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="insights-grid">
+        <article className="glass-panel highlight">
+          <p className="panel-tag">Tema do projeto</p>
+          <h2>Portal de analise, scout e descoberta de talentos</h2>
+          <p>
+            O site combina dashboard, conteudo visual, CRUD completo e integracao com uma API
+            publica para reforcar o requisito de dados externos.
+          </p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Back-end</p>
+          <h3>Back4App via Parse REST API</h3>
+          <p>
+            A entidade principal e <strong>ScoutNotes</strong>, com cadastro, edicao, listagem e
+            exclusao de observacoes sobre jogadores.
+          </p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">API adicional</p>
+          <h3>Tabela publica de futebol</h3>
+          <p>
+            O ranking abaixo consome dados externos para enriquecer a experiencia do usuario e
+            deixar o dashboard mais vivo.
+          </p>
+        </article>
+      </section>
+
+      <section id="ranking" className="content-grid">
+        <article className="glass-panel table-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">API externa</p>
+              <h2>Top 6 da Premier League</h2>
+            </div>
+            <span className="badge">Atualizacao automatica</span>
+          </div>
+
+          <div className="standings-list">
+            {table.map((team, index) => (
+              <div key={team.id} className="standing-row">
+                <div className="standing-team">
+                  <span className="standing-index">{index + 1}</span>
+                  {team.logo ? <img src={team.logo} alt={team.name} /> : null}
+                  <strong>{team.name}</strong>
+                </div>
+                <div className="standing-stats">
+                  <span>{getStatValue(team.stats, "wins")}V</span>
+                  <span>{getStatValue(team.stats, "losses")}D</span>
+                  <span>{getStatValue(team.stats, "points")} pts</span>
+                </div>
+              </div>
+            ))}
+            {table.length === 0 ? <p>Nenhum dado externo foi carregado ainda.</p> : null}
+          </div>
+        </article>
+
+        <article className="glass-panel narrative-panel">
+          <p className="panel-tag">Experiencia</p>
+          <h2>Layout pensado para impressionar na apresentacao</h2>
+          <p>
+            A proposta mistura identidade visual esportiva, elementos com profundidade, cards com
+            destaque e uma secao funcional para demonstrar o CRUD ao vivo no video.
+          </p>
+
+          <ul className="feature-list">
+            <li>Dashboard com indicadores dinamicos</li>
+            <li>Formulario com modo criar e editar</li>
+            <li>Lista de scouting com acoes de atualizar e remover</li>
+            <li>Integracao com API externa para tabela de campeonato</li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="crud" className="crud-grid">
+        <article className="glass-panel form-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">CRUD principal</p>
+              <h2>{editingId ? "Editar observacao" : "Nova observacao"}</h2>
+            </div>
+            <span className="badge accent">{editingId ? "Modo edicao" : "Modo criacao"}</span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="scout-form">
+            <label>
+              Nome do jogador
+              <input
+                name="playerName"
+                value={form.playerName}
+                onChange={handleChange}
+                placeholder="Ex.: Estevao"
+                required
+              />
+            </label>
+
+            <div className="split-fields">
+              <label>
+                Clube
+                <input
+                  name="club"
+                  value={form.club}
+                  onChange={handleChange}
+                  placeholder="Ex.: Palmeiras"
+                  required
+                />
+              </label>
+
+              <label>
+                Posicao
+                <input
+                  name="position"
+                  value={form.position}
+                  onChange={handleChange}
+                  placeholder="Ex.: Ponta direita"
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="split-fields">
+              <label>
+                Nota tecnica
+                <input
+                  name="rating"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={form.rating}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+              <label>
+                Status
+                <select name="status" value={form.status} onChange={handleChange}>
+                  <option>Em observacao</option>
+                  <option>Aprovado</option>
+                  <option>Descartado</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              Observacoes
+              <textarea
+                name="notes"
+                value={form.notes}
+                onChange={handleChange}
+                rows="5"
+                placeholder="Descreva pontos fortes, leitura tática e potencial de mercado."
+                required
+              />
+            </label>
+
+            <div className="form-actions">
+              <button type="submit" className="primary-button" disabled={saving}>
+                {saving ? "Salvando..." : editingId ? "Atualizar observacao" : "Criar observacao"}
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={() => {
+                  setForm(initialForm);
+                  setEditingId(null);
+                }}
+              >
+                Limpar
+              </button>
+            </div>
+          </form>
+
+          {message ? <p className="feedback">{message}</p> : null}
+          {backStatus ? <p className="warning">{backStatus}</p> : null}
+        </article>
+
+        <article className="glass-panel list-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">Lista integrada</p>
+              <h2>Central de scouting</h2>
+            </div>
+            <span className="badge">{items.length} registros</span>
+          </div>
+
+          {loadingCrud ? <p>Carregando observacoes...</p> : null}
+
+          <div className="scout-list">
+            {items.map((item) => (
+              <article key={item.objectId} className="scout-card">
+                <div className="scout-card-top">
+                  <div>
+                    <h3>{item.playerName}</h3>
+                    <p>
+                      {item.club} • {item.position}
+                    </p>
+                  </div>
+                  <span className={`status-pill ${item.status?.toLowerCase().replaceAll(" ", "-")}`}>
+                    {item.status}
+                  </span>
+                </div>
+
+                <div className="scout-meta">
+                  <strong>{item.rating}</strong>
+                  <span>nota tecnica</span>
+                </div>
+
+                <p className="scout-notes">{item.notes}</p>
+
+                <div className="card-actions">
+                  <button className="ghost-button" onClick={() => handleEdit(item)}>
+                    Editar
+                  </button>
+                  <button className="danger-button" onClick={() => handleDelete(item.objectId)}>
+                    Excluir
+                  </button>
+                </div>
+              </article>
+            ))}
+            {!loadingCrud && items.length === 0 ? (
+              <p>
+                Nenhum registro ainda. Configure o Back4App no arquivo <code>.env.local</code> e
+                crie sua primeira observacao.
+              </p>
+            ) : null}
+          </div>
+        </article>
+      </section>
+    </main>
+  );
+}
