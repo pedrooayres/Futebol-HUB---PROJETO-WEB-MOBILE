@@ -15,6 +15,28 @@ function getStatValue(stats, key) {
   return stats?.find((item) => item.name === key)?.displayValue || "--";
 }
 
+function EditIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 20h4.75L19 9.75 14.25 5 4 15.25V20zm2-1.75v-2.17L14.25 7.83l2.17 2.17L8.17 18.25H6zM20.71 8.04a1.003 1.003 0 000-1.42l-3.33-3.33a1.003 1.003 0 00-1.42 0L14.83 4.42 19.58 9.17l1.13-1.13z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm-1 11a2 2 0 01-2-2V8h16v10a2 2 0 01-2 2H6z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const [form, setForm] = useState(initialForm);
   const [items, setItems] = useState([]);
@@ -377,11 +399,23 @@ export default function HomePage() {
                 <p className="scout-notes">{item.notes}</p>
 
                 <div className="card-actions">
-                  <button className="ghost-button" onClick={() => handleEdit(item)}>
-                    Editar
+                  <button
+                    className="icon-action edit-action"
+                    onClick={() => handleEdit(item)}
+                    title="Editar registro"
+                    aria-label={`Editar observacao de ${item.playerName}`}
+                  >
+                    <EditIcon />
+                    <span>Editar</span>
                   </button>
-                  <button className="danger-button" onClick={() => handleDelete(item.objectId)}>
-                    Excluir
+                  <button
+                    className="icon-action delete-action"
+                    onClick={() => handleDelete(item.objectId)}
+                    title="Excluir registro"
+                    aria-label={`Excluir observacao de ${item.playerName}`}
+                  >
+                    <TrashIcon />
+                    <span>Excluir</span>
                   </button>
                 </div>
               </article>

@@ -148,7 +148,8 @@ img {
 
 .primary-button,
 .ghost-button,
-.danger-button {
+.danger-button,
+.icon-action {
   border: 0;
   border-radius: 999px;
   padding: 13px 22px;
@@ -158,7 +159,8 @@ img {
 
 .primary-button:hover,
 .ghost-button:hover,
-.danger-button:hover {
+.danger-button:hover,
+.icon-action:hover {
   transform: translateY(-1px);
 }
 
@@ -178,6 +180,34 @@ img {
   background: rgba(255, 107, 107, 0.14);
   color: #ffd6d6;
   border: 1px solid rgba(255, 107, 107, 0.25);
+}
+
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.icon-action svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.edit-action {
+  color: #d9f4ff;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.22);
+}
+
+.delete-action {
+  color: #ffd6d6;
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.25);
 }
 
 .hero-card {
