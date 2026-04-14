@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 const initialForm = {
@@ -11,10 +10,6 @@ const initialForm = {
   status: "Em observacao",
   notes: ""
 };
-
-function getStatValue(stats, key) {
-  return stats?.find((item) => item.name === key)?.displayValue || "--";
-}
 
 function EditIcon() {
   return (
@@ -38,10 +33,12 @@ function TrashIcon() {
   );
 }
 
-export default function HomePage() {
+export default function ScoutingWorkspace({
+  title = "Central de scouting",
+  subtitle = "CRUD completo integrado ao Back4App para criacao, edicao e exclusao de observacoes."
+}) {
   const [form, setForm] = useState(initialForm);
   const [items, setItems] = useState([]);
-  const [table, setTable] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loadingCrud, setLoadingCrud] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,15 +55,8 @@ export default function HomePage() {
     setLoadingCrud(false);
   }
 
-  async function loadStandings() {
-    const response = await fetch("/api/standings");
-    const data = await response.json();
-    setTable(data.rows || []);
-  }
-
   useEffect(() => {
     loadItems();
-    loadStandings();
   }, []);
 
   const kpis = useMemo(() => {
@@ -77,8 +67,8 @@ export default function HomePage() {
         : "0.0";
 
     return [
-      { label: "Jogadores monitorados", value: String(items.length).padStart(2, "0") },
-      { label: "Aprovados para contato", value: String(approved).padStart(2, "0") },
+      { label: "Registros ativos", value: String(items.length).padStart(2, "0") },
+      { label: "Aprovados", value: String(approved).padStart(2, "0") },
       { label: "Media tecnica", value: average }
     ];
   }, [items]);
@@ -155,133 +145,25 @@ export default function HomePage() {
   }
 
   return (
-    <main className="page-shell">
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">Scouting Platform</span>
-          <h1>Futebol HUB</h1>
-          <p>
-            Um painel moderno para acompanhar tendencias do futebol, avaliar atletas e manter um
-            CRUD de scouting conectado ao Back4App.
-          </p>
-
-          <div className="hero-actions">
-            <Link href="/scouting" className="primary-button">
-              Abrir central de observacao
-            </Link>
-            <Link href="/ranking" className="ghost-button">
-              Ver ranking externo
-            </Link>
-          </div>
+    <section className="page-shell page-stack">
+      <section className="section-banner">
+        <div>
+          <span className="eyebrow">Scouting Room</span>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
         </div>
 
-        <div className="hero-card">
-          <p className="card-label">Match Intelligence</p>
-          <div className="metric-stack">
-            {kpis.map((item) => (
-              <div key={item.label} className="metric-card">
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
+        <div className="mini-kpis">
+          {kpis.map((item) => (
+            <article key={item.label} className="mini-kpi-card">
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="portal-links-grid">
-        <Link href="/times" className="glass-panel portal-link-card">
-          <p className="panel-tag">Clubes</p>
-          <h2>Times</h2>
-          <p>Veja destaques de equipes, leitura tática e contexto competitivo em formato portal.</p>
-        </Link>
-        <Link href="/jogadores" className="glass-panel portal-link-card">
-          <p className="panel-tag">Talentos</p>
-          <h2>Jogadores</h2>
-          <p>Cards editoriais para reforcar a observacao de atletas com visual mais organizado.</p>
-        </Link>
-        <Link href="/favoritos" className="glass-panel portal-link-card">
-          <p className="panel-tag">Curadoria</p>
-          <h2>Favoritos</h2>
-          <p>Uma area inspirada em portal para destacar colecoes e atalhos para o scouting.</p>
-        </Link>
-      </section>
-
-      <section className="insights-grid">
-        <article className="glass-panel highlight">
-          <p className="panel-tag">Tema do projeto</p>
-          <h2>Portal de analise, scout e descoberta de talentos</h2>
-          <p>
-            O site combina dashboard, conteudo visual, CRUD completo e integracao com uma API
-            publica para reforcar o requisito de dados externos.
-          </p>
-        </article>
-
-        <article className="glass-panel">
-          <p className="panel-tag">Back-end</p>
-          <h3>Back4App via Parse REST API</h3>
-          <p>
-            A entidade principal e <strong>ScoutNotes</strong>, com cadastro, edicao, listagem e
-            exclusao de observacoes sobre jogadores.
-          </p>
-        </article>
-
-        <article className="glass-panel">
-          <p className="panel-tag">API adicional</p>
-          <h3>Tabela publica de futebol</h3>
-          <p>
-            O ranking abaixo consome dados externos para enriquecer a experiencia do usuario e
-            deixar o dashboard mais vivo.
-          </p>
-        </article>
-      </section>
-
-      <section id="ranking" className="content-grid">
-        <article className="glass-panel table-panel">
-          <div className="section-heading">
-            <div>
-              <p className="panel-tag">API externa</p>
-              <h2>Top 6 da Premier League</h2>
-            </div>
-            <span className="badge">Atualizacao automatica</span>
-          </div>
-
-          <div className="standings-list">
-            {table.map((team, index) => (
-              <div key={team.id} className="standing-row">
-                <div className="standing-team">
-                  <span className="standing-index">{index + 1}</span>
-                  {team.logo ? <img src={team.logo} alt={team.name} /> : null}
-                  <strong>{team.name}</strong>
-                </div>
-                <div className="standing-stats">
-                  <span>{getStatValue(team.stats, "wins")}V</span>
-                  <span>{getStatValue(team.stats, "losses")}D</span>
-                  <span>{getStatValue(team.stats, "points")} pts</span>
-                </div>
-              </div>
-            ))}
-            {table.length === 0 ? <p>Nenhum dado externo foi carregado ainda.</p> : null}
-          </div>
-        </article>
-
-        <article className="glass-panel narrative-panel">
-          <p className="panel-tag">Experiencia</p>
-          <h2>Layout pensado para impressionar na apresentacao</h2>
-          <p>
-            A proposta mistura identidade visual esportiva, elementos com profundidade, cards com
-            destaque e uma secao funcional para demonstrar o CRUD ao vivo no video.
-          </p>
-
-          <ul className="feature-list">
-            <li>Dashboard com indicadores dinamicos</li>
-            <li>Formulario com modo criar e editar</li>
-            <li>Lista de scouting com acoes de atualizar e remover</li>
-            <li>Integracao com API externa para tabela de campeonato</li>
-          </ul>
-        </article>
-      </section>
-
-      <section id="crud" className="crud-grid">
+      <section className="crud-grid">
         <article className="glass-panel form-panel">
           <div className="section-heading">
             <div>
@@ -358,7 +240,7 @@ export default function HomePage() {
                 value={form.notes}
                 onChange={handleChange}
                 rows="5"
-                placeholder="Descreva pontos fortes, leitura tática e potencial de mercado."
+                placeholder="Descreva pontos fortes, leitura tatica e potencial de mercado."
                 required
               />
             </label>
@@ -388,7 +270,7 @@ export default function HomePage() {
           <div className="section-heading">
             <div>
               <p className="panel-tag">Lista integrada</p>
-              <h2>Central de scouting</h2>
+              <h2>Observacoes recentes</h2>
             </div>
             <span className="badge">{items.length} registros</span>
           </div>
@@ -448,6 +330,6 @@ export default function HomePage() {
           </div>
         </article>
       </section>
-    </main>
+    </section>
   );
 }

@@ -31,6 +31,18 @@ body {
     linear-gradient(180deg, #05101d 0%, #07111f 45%, #0b1422 100%);
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 90px 90px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -53,6 +65,87 @@ img {
   padding: 32px 0 56px;
 }
 
+.page-stack {
+  display: grid;
+  gap: 24px;
+  padding-top: 120px;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  backdrop-filter: blur(18px);
+  background: rgba(4, 12, 24, 0.68);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.site-header-inner {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark strong,
+.nav-link.active {
+  color: var(--text);
+}
+
+.brand-mark span,
+.nav-link {
+  color: var(--muted);
+}
+
+.brand-mark > div {
+  display: grid;
+  gap: 3px;
+}
+
+.brand-ball {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: "Trebuchet MS", sans-serif;
+  font-weight: 700;
+  color: #04101b;
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 .hero,
 .content-grid,
 .crud-grid,
@@ -65,6 +158,10 @@ img {
   grid-template-columns: 1.3fr 0.9fr;
   align-items: stretch;
   padding: 36px 0 20px;
+}
+
+.hero-portal {
+  padding-top: 12px;
 }
 
 .hero-copy,
@@ -264,15 +361,69 @@ img {
   margin-top: 24px;
 }
 
+.portal-links-grid,
+.triple-grid,
+.card-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.portal-links-grid,
+.triple-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .glass-panel {
   border-radius: 28px;
   padding: 28px;
+}
+
+.portal-link-card,
+.favorite-card,
+.team-card,
+.player-spotlight-card,
+.info-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.portal-link-card:hover,
+.favorite-card:hover,
+.team-card:hover,
+.player-spotlight-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(125, 249, 166, 0.22);
 }
 
 .highlight {
   background:
     linear-gradient(135deg, rgba(125, 249, 166, 0.14), rgba(8, 21, 38, 0.82)),
     var(--panel);
+}
+
+.section-banner {
+  border-radius: 28px;
+  padding: 32px;
+  border: 1px solid var(--panel-border);
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.11), rgba(8, 21, 38, 0.84)),
+    var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.section-banner h1 {
+  margin: 12px 0;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.section-banner p {
+  max-width: 60ch;
+  color: var(--muted);
 }
 
 .section-heading {
@@ -292,9 +443,52 @@ img {
 }
 
 .standings-list,
-.scout-list {
+.scout-list,
+.list-stack {
   display: grid;
   gap: 14px;
+}
+
+.mini-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.mini-kpi-card,
+.info-card {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mini-kpi-card strong,
+.info-card strong {
+  display: block;
+  font-family: "Trebuchet MS", sans-serif;
+}
+
+.mini-kpi-card strong {
+  font-size: 1.8rem;
+}
+
+.detail-label,
+.inline-link {
+  color: var(--accent);
+}
+
+.divider-line {
+  height: 1px;
+  margin: 18px 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.inline-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-weight: 700;
 }
 
 .standing-row {
@@ -421,7 +615,10 @@ img {
   .hero,
   .content-grid,
   .crud-grid,
-  .insights-grid {
+  .insights-grid,
+  .portal-links-grid,
+  .triple-grid,
+  .card-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -434,7 +631,8 @@ img {
 
   .hero-copy,
   .hero-card,
-  .glass-panel {
+  .glass-panel,
+  .section-banner {
     padding: 22px;
     border-radius: 22px;
   }
@@ -443,7 +641,16 @@ img {
   .section-heading,
   .standing-row,
   .standing-stats,
-  .scout-card-top {
+  .scout-card-top,
+  .site-header-inner {
     flex-direction: column;
+  }
+
+  .main-nav {
+    justify-content: flex-start;
+  }
+
+  .mini-kpis {
+    grid-template-columns: 1fr;
   }
 }

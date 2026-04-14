@@ -1,4 +1,5 @@
 import "./globals.css";
+import SiteNav from "@/components/SiteNav";
 
 export const metadata = {
   title: "Futebol HUB",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <SiteNav />
+        {children}
+      </body>
     </html>
   );
 }
