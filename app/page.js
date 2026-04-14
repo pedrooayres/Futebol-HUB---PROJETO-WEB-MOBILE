@@ -235,7 +235,7 @@ export default function HomePage() {
         </article>
       </section>
 
-      <section id="ranking" className="content-grid">
+      <section id="ranking">
         <article className="glass-panel table-panel">
           <div className="section-heading">
             <div>
@@ -262,22 +262,6 @@ export default function HomePage() {
             ))}
             {table.length === 0 ? <p>Nenhum dado externo foi carregado ainda.</p> : null}
           </div>
-        </article>
-
-        <article className="glass-panel narrative-panel">
-          <p className="panel-tag">Experiencia</p>
-          <h2>Layout pensado para impressionar na apresentacao</h2>
-          <p>
-            A proposta mistura identidade visual esportiva, elementos com profundidade, cards com
-            destaque e uma secao funcional para demonstrar o CRUD ao vivo no video.
-          </p>
-
-          <ul className="feature-list">
-            <li>Dashboard com indicadores dinamicos</li>
-            <li>Formulario com modo criar e editar</li>
-            <li>Lista de scouting com acoes de atualizar e remover</li>
-            <li>Integracao com API externa para tabela de campeonato</li>
-          </ul>
         </article>
       </section>
 
