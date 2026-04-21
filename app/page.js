@@ -14,9 +14,71 @@ const initialForm = {
 
 const productRoadmap = [
   "Login para scouts e clubes",
+  "Filtros por posicao, nota e status",
+  "Perfil completo do atleta",
+  "Favoritos e comparacao",
   "Comparacao entre atletas",
   "Relatorios para apresentar talentos",
-  "Videos e links de highlights"
+  "Upload de videos e highlights",
+  "Dashboard mais analitico",
+  "Versao mobile mais forte"
+];
+
+const positioningCards = [
+  {
+    title: "Plataforma de scouting esportivo",
+    text: "O projeto deixa de ser apenas uma vitrine e passa a organizar observacoes reais sobre atletas."
+  },
+  {
+    title: "Dashboard de inteligencia no futebol",
+    text: "Indicadores, ranking externo e notas tecnicas ajudam a transformar dados em decisao."
+  },
+  {
+    title: "Central de analise de atletas",
+    text: "Tudo fica concentrado em uma experiencia unica: cadastro, status, avaliacao e acompanhamento."
+  }
+];
+
+const pitchLayers = [
+  {
+    label: "Problema",
+    title: "Avaliacoes ficam espalhadas",
+    text: "Clubes, scouts e projetos de base precisam registrar observacoes sem depender de planilhas soltas ou mensagens perdidas."
+  },
+  {
+    label: "Solucao",
+    title: "O Futebol HUB centraliza o processo",
+    text: "A plataforma junta observacoes, rankings, status dos atletas e acompanhamento em uma area organizada."
+  },
+  {
+    label: "Diferencial",
+    title: "Nao e so pagina visual",
+    text: "O projeto tem CRUD, banco Back4App, API externa, rotas Next.js e deploy real na Vercel."
+  }
+];
+
+const useCases = [
+  "Escolinhas de futebol",
+  "Scouts independentes",
+  "Empresarios",
+  "Projetos sociais esportivos",
+  "Pequenos clubes",
+  "Portal de conteudo esportivo"
+];
+
+const strategySteps = [
+  {
+    phase: "Agora",
+    text: "Manter a base estavel e apresentar como prototipo real de produto."
+  },
+  {
+    phase: "Versao 2",
+    text: "Criar uma evolucao separada com login, perfis de atleta e recursos premium."
+  },
+  {
+    phase: "Portfolio profissional",
+    text: "Usar o projeto como caso completo: problema, solucao, tecnologia, deploy e roadmap."
+  }
 ];
 
 function getStatValue(stats, key) {
@@ -202,6 +264,35 @@ export default function HomePage() {
         <span>Para scouts independentes</span>
       </section>
 
+      <section className="strategy-section">
+        <div className="section-heading">
+          <div>
+            <p className="panel-tag">Fase 1</p>
+            <h2>Posicionamento do produto</h2>
+          </div>
+          <span className="badge accent">De site academico para MVP</span>
+        </div>
+
+        <div className="triple-grid">
+          {positioningCards.map((card) => (
+            <article key={card.title} className="glass-panel strategy-card">
+              <h3>{card.title}</h3>
+              <p>{card.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="pitch-grid">
+        {pitchLayers.map((item) => (
+          <article key={item.label} className="glass-panel pitch-card">
+            <p className="panel-tag">Fase 2 | {item.label}</p>
+            <h2>{item.title}</h2>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </section>
+
       <section className="portal-links-grid">
         <Link href="/times" className="glass-panel portal-link-card">
           <p className="panel-tag">Clubes</p>
@@ -267,6 +358,33 @@ export default function HomePage() {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </article>
+      </section>
+
+      <section className="market-section">
+        <article className="glass-panel">
+          <p className="panel-tag">Fase 4</p>
+          <h2>Possiveis usos reais</h2>
+          <p>
+            O Futebol HUB pode ser direcionado para diferentes contextos do futebol, de base a
+            mercado, sem perder a mesma estrutura principal de acompanhamento.
+          </p>
+          <div className="use-case-grid">
+            {useCases.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        </article>
+
+        <article className="glass-panel strategy-timeline">
+          <p className="panel-tag">Fase 5</p>
+          <h2>Estrategia de evolucao</h2>
+          {strategySteps.map((item) => (
+            <div key={item.phase} className="timeline-step">
+              <strong>{item.phase}</strong>
+              <p>{item.text}</p>
+            </div>
+          ))}
         </article>
       </section>
 
