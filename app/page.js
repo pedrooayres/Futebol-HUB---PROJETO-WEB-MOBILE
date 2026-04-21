@@ -12,6 +12,13 @@ const initialForm = {
   notes: ""
 };
 
+const productRoadmap = [
+  "Login para scouts e clubes",
+  "Comparacao entre atletas",
+  "Relatorios para apresentar talentos",
+  "Videos e links de highlights"
+];
+
 function getStatValue(stats, key) {
   return stats?.find((item) => item.name === key)?.displayValue || "--";
 }
@@ -158,16 +165,16 @@ export default function HomePage() {
     <main className="page-shell">
       <section className="hero">
         <div className="hero-copy">
-          <span className="eyebrow">Scouting Platform</span>
-          <h1>Futebol HUB</h1>
+          <span className="eyebrow">Futebol HUB Pro</span>
+          <h1>Inteligencia esportiva para descobrir talentos</h1>
           <p>
-            Um painel moderno para acompanhar tendencias do futebol, avaliar atletas e manter um
-            CRUD de scouting conectado ao Back4App.
+            Um painel moderno para scouts, clubes e analistas avaliarem atletas, acompanharem
+            indicadores e organizarem decisoes com dados.
           </p>
 
           <div className="hero-actions">
             <Link href="/scouting" className="primary-button">
-              Abrir central de observacao
+              Abrir central de scouting
             </Link>
             <Link href="/ranking" className="ghost-button">
               Ver ranking externo
@@ -186,6 +193,13 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="product-strip">
+        <span>Para escolinhas</span>
+        <span>Para clubes</span>
+        <span>Para empresarios</span>
+        <span>Para scouts independentes</span>
       </section>
 
       <section className="portal-links-grid">
@@ -209,7 +223,7 @@ export default function HomePage() {
       <section className="insights-grid">
         <article className="glass-panel highlight">
           <p className="panel-tag">Tema do projeto</p>
-          <h2>Portal de analise, scout e descoberta de talentos</h2>
+          <h2>Plataforma de scouting, analise e descoberta de talentos</h2>
           <p>
             O site combina dashboard, conteudo visual, CRUD completo e integracao com uma API
             publica para reforcar o requisito de dados externos.
@@ -232,6 +246,27 @@ export default function HomePage() {
             O ranking abaixo consome dados externos para enriquecer a experiencia do usuario e
             deixar o dashboard mais vivo.
           </p>
+        </article>
+      </section>
+
+      <section className="product-grid">
+        <article className="glass-panel product-vision-card">
+          <p className="panel-tag">Visao de produto</p>
+          <h2>De trabalho academico para MVP esportivo</h2>
+          <p>
+            A base atual ja permite demonstrar um produto real: cadastrar jogadores, medir
+            potencial, acompanhar status e usar dados externos como apoio para analise.
+          </p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Proximos passos</p>
+          <h2>Roadmap sugerido</h2>
+          <ul className="feature-list">
+            {productRoadmap.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </article>
       </section>
 

@@ -363,7 +363,8 @@ img {
 
 .portal-links-grid,
 .triple-grid,
-.card-grid {
+.card-grid,
+.product-grid {
   display: grid;
   gap: 24px;
 }
@@ -371,6 +372,32 @@ img {
 .portal-links-grid,
 .triple-grid {
   grid-template-columns: repeat(3, 1fr);
+}
+
+.product-grid {
+  grid-template-columns: 1.15fr 0.85fr;
+  margin: 12px 0 24px;
+}
+
+.product-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 24px;
+}
+
+.product-strip span {
+  border-radius: 999px;
+  padding: 12px 16px;
+  color: #dce7f7;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.product-vision-card {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(125, 249, 166, 0.08)),
+    var(--panel);
 }
 
 .card-grid {
@@ -544,7 +571,9 @@ img {
 
 .scout-form input,
 .scout-form select,
-.scout-form textarea {
+.scout-form textarea,
+.scout-toolbar input,
+.scout-toolbar select {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -556,9 +585,62 @@ img {
 
 .scout-form input:focus,
 .scout-form select:focus,
-.scout-form textarea:focus {
+.scout-form textarea:focus,
+.scout-toolbar input:focus,
+.scout-toolbar select:focus {
   border-color: rgba(125, 249, 166, 0.55);
   box-shadow: 0 0 0 3px rgba(125, 249, 166, 0.12);
+}
+
+.scout-toolbar {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.scout-toolbar label {
+  display: grid;
+  gap: 8px;
+  color: #dce7f7;
+}
+
+.comparison-panel {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(125, 249, 166, 0.07);
+  border: 1px solid rgba(125, 249, 166, 0.12);
+}
+
+.comparison-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparison-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(4, 12, 24, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.comparison-card span,
+.comparison-card small {
+  color: var(--muted);
+}
+
+.comparison-card b {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #04101b;
+  background: var(--accent);
 }
 
 .scout-card {
@@ -618,7 +700,10 @@ img {
   .insights-grid,
   .portal-links-grid,
   .triple-grid,
-  .card-grid {
+  .card-grid,
+  .product-grid,
+  .scout-toolbar,
+  .comparison-list {
     grid-template-columns: 1fr;
   }
 }

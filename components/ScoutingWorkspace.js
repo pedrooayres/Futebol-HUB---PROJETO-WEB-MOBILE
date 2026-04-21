@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 const initialForm = {
   playerName: "",
@@ -44,6 +44,10 @@ export default function ScoutingWorkspace({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [backStatus, setBackStatus] = useState("");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Todos");
+  const [sortMode, setSortMode] = useState("rating");
+  const deferredQuery = useDeferredValue(query);
 
   async function loadItems() {
     setLoadingCrud(true);
@@ -72,6 +76,32 @@ export default function ScoutingWorkspace({
       { label: "Media tecnica", value: average }
     ];
   }, [items]);
+
+  const filteredItems = useMemo(() => {
+    const normalizedQuery = deferredQuery.trim().toLowerCase();
+
+    return [...items]
+      .filter((item) => {
+        const matchesStatus = statusFilter === "Todos" || item.status === statusFilter;
+        const searchable = `${item.playerName || ""} ${item.club || ""} ${item.position || ""}`.toLowerCase();
+        const matchesQuery = normalizedQuery.length === 0 || searchable.includes(normalizedQuery);
+
+        return matchesStatus && matchesQuery;
+      })
+      .sort((a, b) => {
+        if (sortMode === "name") {
+          return (a.playerName || "").localeCompare(b.playerName || "");
+        }
+
+        if (sortMode === "updated") {
+          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+        }
+
+        return Number(b.rating || 0) - Number(a.rating || 0);
+      });
+  }, [deferredQuery, items, sortMode, statusFilter]);
+
+  const comparison = useMemo(() => filteredItems.slice(0, 3), [filteredItems]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -272,13 +302,61 @@ export default function ScoutingWorkspace({
               <p className="panel-tag">Lista integrada</p>
               <h2>Observacoes recentes</h2>
             </div>
-            <span className="badge">{items.length} registros</span>
+            <span className="badge">{filteredItems.length} de {items.length} registros</span>
           </div>
 
           {loadingCrud ? <p>Carregando observacoes...</p> : null}
 
+          <div className="scout-toolbar">
+            <label>
+              Buscar atleta
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Nome, clube ou posicao"
+              />
+            </label>
+
+            <label>
+              Status
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option>Todos</option>
+                <option>Em observacao</option>
+                <option>Aprovado</option>
+                <option>Descartado</option>
+              </select>
+            </label>
+
+            <label>
+              Ordenar
+              <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
+                <option value="rating">Maior nota</option>
+                <option value="updated">Mais recentes</option>
+                <option value="name">Nome</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="comparison-panel">
+            <div>
+              <p className="panel-tag">Comparativo rapido</p>
+              <h3>Top atletas filtrados</h3>
+            </div>
+            <div className="comparison-list">
+              {comparison.map((item) => (
+                <article key={item.objectId} className="comparison-card">
+                  <span>{item.position}</span>
+                  <strong>{item.playerName}</strong>
+                  <small>{item.club}</small>
+                  <b>{item.rating}</b>
+                </article>
+              ))}
+              {comparison.length === 0 ? <p>Nenhum atleta encontrado nos filtros atuais.</p> : null}
+            </div>
+          </div>
+
           <div className="scout-list">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <article key={item.objectId} className="scout-card">
                 <div className="scout-card-top">
                   <div>
@@ -326,6 +404,9 @@ export default function ScoutingWorkspace({
                 Nenhum registro ainda. Configure o Back4App no arquivo <code>.env.local</code> e
                 crie sua primeira observacao.
               </p>
+            ) : null}
+            {!loadingCrud && items.length > 0 && filteredItems.length === 0 ? (
+              <p>Nenhum registro combina com os filtros selecionados.</p>
             ) : null}
           </div>
         </article>

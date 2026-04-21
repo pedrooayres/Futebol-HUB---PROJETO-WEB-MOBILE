@@ -21,8 +21,8 @@ export default function SiteNav() {
         <Link href="/" className="brand-mark">
           <span className="brand-ball">F</span>
           <div>
-            <strong>Futebol HUB</strong>
-            <span>Portal de analise e scouting</span>
+            <strong>Futebol HUB Pro</strong>
+            <span>Inteligencia esportiva e scouting</span>
           </div>
         </Link>
 
