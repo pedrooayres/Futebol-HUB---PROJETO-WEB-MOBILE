@@ -518,6 +518,222 @@ img {
   gap: 12px;
 }
 
+.leader-card strong {
+  display: block;
+  margin-top: 16px;
+  font-size: 2rem;
+  font-family: "Trebuchet MS", sans-serif;
+}
+
+.chart-list {
+  display: grid;
+  gap: 14px;
+}
+
+.chart-row {
+  display: grid;
+  gap: 8px;
+}
+
+.chart-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.chart-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chart-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.chart-fill-secondary {
+  background: linear-gradient(135deg, var(--secondary), #7dd3fc);
+}
+
+.chart-fill-danger {
+  background: linear-gradient(135deg, #fca5a5, var(--danger));
+}
+
+.filter-panel,
+.compare-grid,
+.trend-select {
+  display: grid;
+}
+
+.ranking-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ranking-filters label,
+.trend-select {
+  gap: 8px;
+  color: #dce7f7;
+}
+
+.ranking-filters select,
+.trend-select select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  outline: none;
+}
+
+.ranking-filters select:focus,
+.trend-select select:focus {
+  border-color: rgba(125, 249, 166, 0.55);
+  box-shadow: 0 0 0 3px rgba(125, 249, 166, 0.12);
+}
+
+.compare-header {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.compare-team-card,
+.trend-club-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.compare-team-card strong,
+.trend-club-card strong {
+  color: var(--text);
+}
+
+.compare-team-card span,
+.trend-club-card span {
+  color: var(--muted);
+}
+
+.compare-grid {
+  gap: 14px;
+}
+
+.compare-stat {
+  display: grid;
+  gap: 8px;
+}
+
+.compare-stat-meta {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+
+.compare-stat-meta strong {
+  color: var(--text);
+  text-align: center;
+}
+
+.compare-stat-meta span:first-child {
+  text-align: left;
+}
+
+.compare-stat-meta span:last-child {
+  text-align: right;
+}
+
+.compare-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.compare-bar {
+  height: 10px;
+  border-radius: 999px;
+}
+
+.compare-bar-left {
+  justify-self: end;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
+.compare-bar-right {
+  background: linear-gradient(135deg, var(--secondary), #7dd3fc);
+}
+
+.trend-select {
+  margin-bottom: 16px;
+}
+
+.standings-table-shell {
+  overflow-x: auto;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 880px;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.standings-table th {
+  color: #dce7f7;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.standings-table td {
+  color: var(--muted);
+}
+
+.standings-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-team-cell img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.table-team-cell strong {
+  display: block;
+  color: var(--text);
+}
+
+.table-team-cell span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .card-grid {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -824,6 +1040,8 @@ img {
   .card-grid,
   .product-grid,
   .use-case-grid,
+  .ranking-filters,
+  .compare-header,
   .scout-toolbar,
   .comparison-list {
     grid-template-columns: 1fr;

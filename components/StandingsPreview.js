@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-function getStatValue(stats, key) {
-  return stats?.find((item) => item.name === key)?.displayValue || "--";
+function getStatValue(stats, keys) {
+  const keyList = Array.isArray(keys) ? keys : [keys];
+  return stats?.find((item) => keyList.includes(item.name))?.displayValue || "--";
 }
 
 export default function StandingsPreview({ title = "Top 6 da Premier League", limit = 6 }) {
@@ -33,14 +34,14 @@ export default function StandingsPreview({ title = "Top 6 da Premier League", li
         {table.map((team, index) => (
           <div key={team.id} className="standing-row">
             <div className="standing-team">
-              <span className="standing-index">{index + 1}</span>
+              <span className="standing-index">{team.rank || index + 1}</span>
               {team.logo ? <img src={team.logo} alt={team.name} /> : null}
               <strong>{team.name}</strong>
             </div>
             <div className="standing-stats">
-              <span>{getStatValue(team.stats, "wins")}V</span>
-              <span>{getStatValue(team.stats, "losses")}D</span>
-              <span>{getStatValue(team.stats, "points")} pts</span>
+              <span>{team.wins ?? getStatValue(team.stats, "wins")}V</span>
+              <span>{team.draws ?? getStatValue(team.stats, ["ties", "draws"])}E</span>
+              <span>{team.points ?? getStatValue(team.stats, "points")} pts</span>
             </div>
           </div>
         ))}
