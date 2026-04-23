@@ -607,7 +607,10 @@ img {
 }
 
 .compare-team-card,
-.trend-club-card {
+.trend-club-card,
+.team-full-card,
+.player-full-card,
+.favorite-full-card {
   display: grid;
   gap: 6px;
   padding: 16px;
@@ -617,7 +620,8 @@ img {
 }
 
 .compare-team-card strong,
-.trend-club-card strong {
+.trend-club-card strong,
+.team-info-grid strong {
   color: var(--text);
 }
 
@@ -678,6 +682,37 @@ img {
 
 .trend-select {
   margin-bottom: 16px;
+}
+
+.team-info-grid,
+.player-meta-grid,
+.mini-bars {
+  display: grid;
+  gap: 14px;
+}
+
+.team-info-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.player-meta-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  color: var(--muted);
+}
+
+.mini-bars {
+  margin-top: 18px;
+}
+
+.mini-bar-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini-bar-row span {
+  color: var(--muted);
 }
 
 .standings-table-shell {
@@ -1040,6 +1075,8 @@ img {
   .card-grid,
   .product-grid,
   .use-case-grid,
+  .team-info-grid,
+  .player-meta-grid,
   .ranking-filters,
   .compare-header,
   .scout-toolbar,
