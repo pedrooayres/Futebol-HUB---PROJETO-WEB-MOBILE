@@ -151,7 +151,8 @@ img {
 .crud-grid,
 .insights-grid,
 .pitch-grid,
-.market-section {
+.market-section,
+.professional-grid {
   display: grid;
   gap: 24px;
 }
@@ -410,6 +411,11 @@ img {
   margin: 12px 0 24px;
 }
 
+.professional-grid {
+  grid-template-columns: 1.1fr 0.9fr;
+  margin: 24px 0;
+}
+
 .market-section {
   grid-template-columns: 1.05fr 0.95fr;
   margin: 12px 0 24px;
@@ -464,6 +470,52 @@ img {
   background:
     linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(125, 249, 166, 0.08)),
     var(--panel);
+}
+
+.summary-card,
+.note-card {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.workflow-list,
+.note-list {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-row,
+.note-card {
+  border-radius: 20px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.workflow-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.workflow-row p,
+.note-meta {
+  margin: 0;
+  color: var(--muted);
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.note-header h3 {
+  margin: 0 0 6px;
+}
+
+.compact-grid {
+  gap: 12px;
 }
 
 .card-grid {
@@ -766,6 +818,7 @@ img {
   .insights-grid,
   .pitch-grid,
   .market-section,
+  .professional-grid,
   .portal-links-grid,
   .triple-grid,
   .card-grid,

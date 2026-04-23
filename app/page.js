@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import HomeDashboard from "@/components/HomeDashboard";
+
 const initialForm = {
   playerName: "",
   club: "",
@@ -108,6 +110,10 @@ function TrashIcon() {
 }
 
 export default function HomePage() {
+  return <HomeDashboard />;
+}
+
+function HomePageLegacy() {
   const [form, setForm] = useState(initialForm);
   const [items, setItems] = useState([]);
   const [table, setTable] = useState([]);
