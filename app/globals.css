@@ -368,7 +368,9 @@ img {
 .triple-grid,
 .card-grid,
 .product-grid,
-.use-case-grid {
+.use-case-grid,
+.report-index-grid,
+.report-meta-grid {
   display: grid;
   gap: 24px;
 }
@@ -686,12 +688,21 @@ img {
 
 .team-info-grid,
 .player-meta-grid,
-.mini-bars {
+.mini-bars,
+.report-link-list {
   display: grid;
   gap: 14px;
 }
 
 .team-info-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.report-index-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.report-meta-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -713,6 +724,29 @@ img {
 
 .mini-bar-row span {
   color: var(--muted);
+}
+
+.report-index-card {
+  display: grid;
+  gap: 18px;
+}
+
+.report-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-tag-row span {
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: #dce7f7;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.report-link-list {
+  margin-top: 8px;
 }
 
 .standings-table-shell {
@@ -1075,6 +1109,8 @@ img {
   .card-grid,
   .product-grid,
   .use-case-grid,
+  .report-index-grid,
+  .report-meta-grid,
   .team-info-grid,
   .player-meta-grid,
   .ranking-filters,

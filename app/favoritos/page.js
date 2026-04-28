@@ -50,6 +50,14 @@ export default function FavoritesPage() {
                 <span className="detail-label">Objetivo</span>
                 <strong>{item.objective}</strong>
               </div>
+              <div>
+                <span className="detail-label">Responsavel</span>
+                <strong>{item.owner}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Proxima acao</span>
+                <strong>{item.nextAction}</strong>
+              </div>
             </div>
 
             <ul className="feature-list">
@@ -57,6 +65,14 @@ export default function FavoritesPage() {
                 <li key={entry}>{entry}</li>
               ))}
             </ul>
+
+            <div className="report-link-list">
+              {item.relatedProfiles.map((profile) => (
+                <Link key={profile} href={profile} className="inline-link">
+                  Abrir perfil relacionado
+                </Link>
+              ))}
+            </div>
 
             <Link href="/scouting" className="inline-link">
               Ir para a central de scouting

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
@@ -9,33 +11,33 @@ export default function TeamsPage() {
     <main className="page-shell page-stack">
       <section className="section-banner">
         <div>
-          <span className="eyebrow">Club Radar</span>
-          <h1>Modo full dos times</h1>
+          <span className="eyebrow">Club Reports</span>
+          <h1>Relatorios de times</h1>
           <p>
-            Leitura de perfil competitivo, foco de mercado, indices de desempenho e prioridade de
-            observacao para os clubes acompanhados.
+            Visao executiva para profissionais de scouting, coordenacao e mercado com leitura de
+            identidade, risco, necessidade de elenco e oportunidade de monitoramento.
           </p>
         </div>
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
             <strong>{featuredTeams.length}</strong>
-            <span>Clubes</span>
+            <span>Relatorios ativos</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{averageRating}</strong>
-            <span>Media geral</span>
+            <span>Rating medio</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>3</strong>
-            <span>Indices por clube</span>
+            <strong>Profissional</strong>
+            <span>Uso orientado a decisao</span>
           </article>
         </div>
       </section>
 
-      <section className="card-grid">
+      <section className="report-index-grid">
         {featuredTeams.map((team) => (
-          <article key={team.name} className="glass-panel team-card team-full-card">
+          <article key={team.slug} className="glass-panel report-index-card">
             <div className="section-heading">
               <div>
                 <p className="panel-tag">{team.league}</p>
@@ -44,17 +46,16 @@ export default function TeamsPage() {
               <span className="badge accent">{team.rating}</span>
             </div>
 
-            <p>{team.profile}</p>
-            <div className="divider-line" />
+            <p>{team.reportSummary}</p>
 
-            <div className="team-info-grid">
+            <div className="report-meta-grid">
               <div>
-                <span className="detail-label">Leitura tatica</span>
-                <strong>{team.style}</strong>
+                <span className="detail-label">Modelo base</span>
+                <strong>{team.system}</strong>
               </div>
               <div>
                 <span className="detail-label">Momento</span>
-                <strong>{team.moment}</strong>
+                <strong>{team.phase}</strong>
               </div>
               <div>
                 <span className="detail-label">Foco de mercado</span>
@@ -62,41 +63,15 @@ export default function TeamsPage() {
               </div>
             </div>
 
-            <div className="mini-bars">
-              <div className="mini-bar-row">
-                <span>Ofensivo</span>
-                <div className="chart-track">
-                  <div className="chart-fill" style={{ width: `${team.metrics.offensiveIndex}%` }} />
-                </div>
-                <strong>{team.metrics.offensiveIndex}</strong>
-              </div>
-              <div className="mini-bar-row">
-                <span>Defensivo</span>
-                <div className="chart-track">
-                  <div
-                    className="chart-fill chart-fill-secondary"
-                    style={{ width: `${team.metrics.defensiveIndex}%` }}
-                  />
-                </div>
-                <strong>{team.metrics.defensiveIndex}</strong>
-              </div>
-              <div className="mini-bar-row">
-                <span>Desenvolvimento</span>
-                <div className="chart-track">
-                  <div
-                    className="chart-fill chart-fill-danger"
-                    style={{ width: `${team.metrics.developmentIndex}%` }}
-                  />
-                </div>
-                <strong>{team.metrics.developmentIndex}</strong>
-              </div>
+            <div className="report-tag-row">
+              {team.strengths.slice(0, 3).map((item) => (
+                <span key={item}>{item}</span>
+              ))}
             </div>
 
-            <ul className="feature-list">
-              {team.strengths.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <Link href={`/times/${team.slug}`} className="inline-link">
+              Abrir relatorio completo
+            </Link>
           </article>
         ))}
       </section>
