@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import GlobalSearch from "@/components/GlobalSearch";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -41,6 +42,8 @@ export default function SiteNav() {
             );
           })}
         </nav>
+
+        <GlobalSearch />
       </div>
     </header>
   );

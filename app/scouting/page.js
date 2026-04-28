@@ -1,10 +1,14 @@
+import { Suspense } from "react";
+
 import ScoutingWorkspace from "@/components/ScoutingWorkspace";
 
 export default function ScoutingPage() {
   return (
-    <ScoutingWorkspace
-      title="Central de scouting"
-      subtitle="Area dedicada para criar, editar e excluir observacoes de atletas, mantendo a sensacao de um modulo profissional do portal."
-    />
+    <Suspense fallback={null}>
+      <ScoutingWorkspace
+        title="Mesa de scouting"
+        subtitle="Ambiente de trabalho para registrar relatorios, priorizar atletas, montar shortlist e exportar fichas para decisao tecnica."
+      />
+    </Suspense>
   );
 }

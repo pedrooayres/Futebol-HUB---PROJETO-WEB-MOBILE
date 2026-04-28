@@ -1,5 +1,24 @@
 import { NextResponse } from "next/server";
 import { back4appRequest, getClassName, hasBack4AppConfig } from "@/lib/back4app";
+import { parseListField } from "@/lib/report-utils";
+
+function buildBody(payload) {
+  return {
+    playerName: payload.playerName,
+    club: payload.club,
+    position: payload.position,
+    rating: Number(payload.rating),
+    status: payload.status,
+    priority: payload.priority || "Media",
+    reportSummary: payload.reportSummary || "",
+    strengths: parseListField(payload.strengths),
+    risks: parseListField(payload.risks),
+    recommendation: payload.recommendation || "",
+    nextAction: payload.nextAction || "",
+    isFavorite: Boolean(payload.isFavorite),
+    notes: payload.notes
+  };
+}
 
 export async function GET() {
   if (!hasBack4AppConfig()) {
@@ -35,14 +54,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const payload = await request.json();
-    const body = {
-      playerName: payload.playerName,
-      club: payload.club,
-      position: payload.position,
-      rating: Number(payload.rating),
-      status: payload.status,
-      notes: payload.notes
-    };
+    const body = buildBody(payload);
 
     const created = await back4appRequest("", {
       method: "POST",

@@ -90,6 +90,7 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  flex-wrap: wrap;
 }
 
 .brand-mark {
@@ -133,6 +134,69 @@ img {
   gap: 10px;
 }
 
+.global-search-shell {
+  position: relative;
+  flex: 1 1 320px;
+  max-width: 420px;
+}
+
+.global-search-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.global-search-form input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  outline: none;
+}
+
+.global-search-form input:focus {
+  border-color: rgba(125, 249, 166, 0.55);
+  box-shadow: 0 0 0 3px rgba(125, 249, 166, 0.12);
+}
+
+.global-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 16, 29, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.global-search-result {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.global-search-result strong,
+.report-block p,
+.checkbox-row span {
+  color: var(--text);
+}
+
+.global-search-result small,
+.global-search-result p {
+  color: var(--muted);
+  margin: 0;
+}
+
 .nav-link {
   padding: 10px 14px;
   border-radius: 999px;
@@ -152,7 +216,10 @@ img {
 .insights-grid,
 .pitch-grid,
 .market-section,
-.professional-grid {
+.professional-grid,
+.workbench-grid,
+.report-workspace-grid,
+.report-columns {
   display: grid;
   gap: 24px;
 }
@@ -362,6 +429,18 @@ img {
 .crud-grid {
   grid-template-columns: 1.1fr 0.9fr;
   margin-top: 24px;
+}
+
+.workbench-grid {
+  grid-template-columns: 0.95fr 1.05fr;
+}
+
+.report-workspace-grid {
+  grid-template-columns: 0.8fr 1.2fr;
+}
+
+.report-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .portal-links-grid,
@@ -1053,6 +1132,21 @@ img {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.scout-card-active {
+  border-color: rgba(125, 249, 166, 0.32);
+  box-shadow: 0 0 0 1px rgba(125, 249, 166, 0.18);
+}
+
+.scout-card-select {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
 .scout-card-top {
   justify-content: space-between;
   align-items: flex-start;
@@ -1069,8 +1163,80 @@ img {
   font-family: "Trebuchet MS", sans-serif;
 }
 
+.scout-card-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .scout-notes {
   line-height: 1.6;
+}
+
+.favorite-action {
+  color: #fff3c4;
+  background: rgba(255, 220, 90, 0.1);
+  border-color: rgba(255, 220, 90, 0.2);
+}
+
+.favorite-active {
+  color: #04101b;
+  background: linear-gradient(135deg, #ffe28a, #ffd24d);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 0;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.four-up {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.split-fields-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.four-columns {
+  grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr;
+}
+
+.compact-actions {
+  margin-top: 0;
+}
+
+.compact-list {
+  margin-top: 8px;
+}
+
+.report-preview-content,
+.report-block {
+  display: grid;
+  gap: 10px;
+}
+
+.report-preview-panel {
+  align-content: start;
+}
+
+.report-block {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.report-block p {
+  margin: 0;
+  line-height: 1.7;
 }
 
 .status-pill {
@@ -1111,12 +1277,18 @@ img {
   .use-case-grid,
   .report-index-grid,
   .report-meta-grid,
+  .workbench-grid,
+  .report-workspace-grid,
+  .report-columns,
   .team-info-grid,
   .player-meta-grid,
   .ranking-filters,
   .compare-header,
   .scout-toolbar,
-  .comparison-list {
+  .comparison-list,
+  .scout-card-kpis,
+  .split-fields-3,
+  .four-up {
     grid-template-columns: 1fr;
   }
 }
@@ -1146,6 +1318,11 @@ img {
 
   .main-nav {
     justify-content: flex-start;
+  }
+
+  .global-search-shell {
+    max-width: none;
+    width: 100%;
   }
 
   .mini-kpis {
