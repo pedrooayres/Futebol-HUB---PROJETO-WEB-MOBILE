@@ -82,7 +82,10 @@ export default function SearchWorkspace() {
                     <p className="panel-tag">{item.type}</p>
                     <h2>{item.title}</h2>
                   </div>
-                  <span className="badge">{item.subtitle}</span>
+                  <div className="result-badge-row">
+                    <span className="badge">{item.source}</span>
+                    <span className="badge">{item.subtitle}</span>
+                  </div>
                 </div>
 
                 <p>{item.description}</p>

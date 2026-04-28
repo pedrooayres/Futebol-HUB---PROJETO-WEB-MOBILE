@@ -80,7 +80,10 @@ export default function GlobalSearch() {
           {!loading
             ? results.map((item) => (
                 <Link key={item.id} href={item.href} className="global-search-result">
-                  <span className="badge">{item.type}</span>
+                  <div className="result-badge-row">
+                    <span className="badge">{item.type}</span>
+                    <span className="badge">{item.source}</span>
+                  </div>
                   <strong>{item.title}</strong>
                   <small>{item.subtitle}</small>
                   <p>{item.description}</p>

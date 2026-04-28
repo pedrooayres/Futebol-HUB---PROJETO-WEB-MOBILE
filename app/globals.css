@@ -191,6 +191,13 @@ img {
   color: var(--text);
 }
 
+.result-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .global-search-result small,
 .global-search-result p {
   color: var(--muted);

@@ -9,6 +9,7 @@ const navItems = [
   { href: "/times", label: "Times" },
   { href: "/jogadores", label: "Jogadores" },
   { href: "/ranking", label: "Ranking" },
+  { href: "/relatorios", label: "Relatorios" },
   { href: "/favoritos", label: "Favoritos" },
   { href: "/scouting", label: "Scouting" }
 ];
