@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { spotlightPlayers } from "@/lib/football-data";
+import { dataSourceSummary, spotlightPlayers } from "@/lib/football-data";
 
 export default function PlayersPage() {
   const topRating = [...spotlightPlayers].sort((a, b) => b.rating - a.rating)[0];
@@ -29,6 +29,10 @@ export default function PlayersPage() {
           <article className="mini-kpi-card">
             <strong>{topRating?.rating || 0}</strong>
             <span>Nota de referencia</span>
+          </article>
+          <article className="mini-kpi-card">
+            <strong>{dataSourceSummary.status}</strong>
+            <span>Pipeline externo</span>
           </article>
         </div>
       </section>

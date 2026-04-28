@@ -198,6 +198,45 @@ img {
   justify-content: flex-end;
 }
 
+.form-pill,
+.trend-chip {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+.form-pill {
+  min-width: 38px;
+  text-align: center;
+  color: #04101b;
+}
+
+.form-v {
+  background: var(--accent);
+}
+
+.form-e {
+  background: #7dd3fc;
+}
+
+.form-d {
+  background: #fca5a5;
+}
+
+.trend-rating-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.trend-chip {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .global-search-result small,
 .global-search-result p {
   color: var(--muted);

@@ -37,6 +37,10 @@ export default async function MarketReportPage({ params }) {
             <strong>{report.status}</strong>
             <span>Status do relatorio</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>{report.source}</strong>
+            <span>Origem do relatorio</span>
+          </article>
         </div>
       </section>
 

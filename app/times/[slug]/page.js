@@ -36,6 +36,10 @@ export default async function TeamProfilePage({ params }) {
             <strong>{team.phase}</strong>
             <span>Momento competitivo</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>{team.source}</strong>
+            <span>Origem do perfil</span>
+          </article>
         </div>
       </section>
 
@@ -113,6 +117,70 @@ export default async function TeamProfilePage({ params }) {
               <strong>{team.metrics.consistencyIndex}</strong>
             </div>
           </div>
+
+          <div className="divider-line" />
+
+          <div className="report-meta-grid">
+            <div>
+              <span className="detail-label">Gols por jogo</span>
+              <strong>{team.advancedMetrics.goalsPerMatch}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Chutes no alvo</span>
+              <strong>{team.advancedMetrics.shotsOnTarget}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Posse media</span>
+              <strong>{team.advancedMetrics.possession}%</strong>
+            </div>
+            <div>
+              <span className="detail-label">Clean sheets</span>
+              <strong>{team.advancedMetrics.cleanSheetRate}%</strong>
+            </div>
+            <div>
+              <span className="detail-label">Mandante</span>
+              <strong>{team.homeAway.home}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Visitante</span>
+              <strong>{team.homeAway.away}</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <article className="glass-panel">
+          <p className="panel-tag">Forma recente</p>
+          <h2>Ultimos jogos</h2>
+          <div className="list-stack">
+            {team.recentForm.map((match) => (
+              <article key={`${match.opponent}-${match.score}`} className="workflow-row">
+                <div className={`form-pill form-${match.result.toLowerCase()}`}>{match.result}</div>
+                <div>
+                  <strong>{match.opponent}</strong>
+                  <p>
+                    {match.score} • {match.venue}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Streaks e H2H</p>
+          <h2>Contexto competitivo</h2>
+          <ul className="feature-list">
+            {team.streaks.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+
+          <div className="divider-line" />
+          <span className="detail-label">Foco de confronto</span>
+          <strong>{team.h2hFocus.target}</strong>
+          <p>{team.h2hFocus.summary}</p>
         </article>
       </section>
 
@@ -140,6 +208,33 @@ export default async function TeamProfilePage({ params }) {
 
       <section className="professional-grid">
         <article className="glass-panel">
+          <p className="panel-tag">Provavel formacao</p>
+          <h2>Lineup base</h2>
+          <span className="detail-label">{team.probableLineup.formation}</span>
+          <ul className="feature-list">
+            {team.probableLineup.starters.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+
+          <div className="divider-line" />
+          <span className="detail-label">Banco util</span>
+          <p>{team.probableLineup.bench.join(" • ")}</p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Performers</p>
+          <h2>Destaques do contexto</h2>
+          <ul className="feature-list">
+            {team.topPerformers.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <article className="glass-panel">
           <p className="panel-tag">Forcas</p>
           <h2>Pontos de sustentacao</h2>
           <ul className="feature-list">
@@ -157,6 +252,34 @@ export default async function TeamProfilePage({ params }) {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <article className="glass-panel">
+          <p className="panel-tag">Bola parada</p>
+          <h2>Perfil de set pieces</h2>
+          <p>{team.setPieceProfile.offensive}</p>
+          <p>{team.setPieceProfile.defensive}</p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Disciplina</p>
+          <h2>Leitura de faltas e cartoes</h2>
+          <div className="report-meta-grid">
+            <div>
+              <span className="detail-label">Faltas/jogo</span>
+              <strong>{team.discipline.foulsPerMatch}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Amarelos</span>
+              <strong>{team.discipline.yellowCards}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Vermelhos</span>
+              <strong>{team.discipline.redCards}</strong>
+            </div>
+          </div>
         </article>
       </section>
     </main>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { featuredTeams } from "@/lib/football-data";
+import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
   const averageRating = (
@@ -31,6 +31,10 @@ export default function TeamsPage() {
           <article className="mini-kpi-card">
             <strong>Profissional</strong>
             <span>Uso orientado a decisao</span>
+          </article>
+          <article className="mini-kpi-card">
+            <strong>{dataSourceSummary.status}</strong>
+            <span>Pipeline externo</span>
           </article>
         </div>
       </section>

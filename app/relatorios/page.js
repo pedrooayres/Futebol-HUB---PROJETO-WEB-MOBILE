@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { marketReports } from "@/lib/football-data";
+import { dataSourceSummary, marketReports } from "@/lib/football-data";
 
 export default function ReportsPage() {
   return (
@@ -27,6 +27,10 @@ export default function ReportsPage() {
           <article className="mini-kpi-card">
             <strong>Expandido</strong>
             <span>Indice de busca</span>
+          </article>
+          <article className="mini-kpi-card">
+            <strong>{dataSourceSummary.lastSyncLabel}</strong>
+            <span>Ultimo sync logico</span>
           </article>
         </div>
       </section>

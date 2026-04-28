@@ -38,6 +38,10 @@ export default async function PlayerProfilePage({ params }) {
             <strong>{player.contractStatus}</strong>
             <span>Leitura de mercado</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>{player.source}</strong>
+            <span>Origem do perfil</span>
+          </article>
         </div>
       </section>
 
@@ -120,6 +124,77 @@ export default async function PlayerProfilePage({ params }) {
               <strong>{player.metrics.decisionMaking}</strong>
             </div>
           </div>
+
+          <div className="divider-line" />
+
+          <div className="report-meta-grid">
+            <div>
+              <span className="detail-label">Jogos</span>
+              <strong>{player.seasonStats.matches}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Titular</span>
+              <strong>{player.seasonStats.starts}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Gols</span>
+              <strong>{player.seasonStats.goals}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Assistencias</span>
+              <strong>{player.seasonStats.assists}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Minutos</span>
+              <strong>{player.seasonStats.minutes}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Passes-chave</span>
+              <strong>{player.seasonStats.keyPasses}</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <article className="glass-panel">
+          <p className="panel-tag">Forma e disponibilidade</p>
+          <h2>Snapshot competitivo</h2>
+          <div className="report-meta-grid">
+            <div>
+              <span className="detail-label">Condicao</span>
+              <strong>{player.availability.condition}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Carga</span>
+              <strong>{player.availability.load}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Toques na area</span>
+              <strong>{player.shotProfile.touchesInBox}</strong>
+            </div>
+          </div>
+          <p>{player.availability.note}</p>
+
+          <div className="divider-line" />
+          <span className="detail-label">Trend ratings</span>
+          <div className="trend-rating-row">
+            {player.trendRatings.map((item, index) => (
+              <span key={`${player.slug}-${index}`} className="trend-chip">
+                {item}
+              </span>
+            ))}
+          </div>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Jogos recentes</p>
+          <h2>Leitura de partida</h2>
+          <ul className="feature-list">
+            {player.recentMatches.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </article>
       </section>
 
@@ -142,6 +217,41 @@ export default async function PlayerProfilePage({ params }) {
               <li key={item}>{item}</li>
             ))}
           </ul>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <article className="glass-panel">
+          <p className="panel-tag">Funcao e comparacao</p>
+          <h2>Como o atleta se encaixa</h2>
+          <ul className="feature-list">
+            {player.roleProfile.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+
+          <div className="divider-line" />
+          <span className="detail-label">Perfis comparaveis</span>
+          <p>{player.comparisonProfiles.join(" • ")}</p>
+        </article>
+
+        <article className="glass-panel">
+          <p className="panel-tag">Finalizacao</p>
+          <h2>Shot profile</h2>
+          <div className="report-meta-grid">
+            <div>
+              <span className="detail-label">Chutes</span>
+              <strong>{player.shotProfile.shots}</strong>
+            </div>
+            <div>
+              <span className="detail-label">No alvo</span>
+              <strong>{player.shotProfile.onTarget}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Duelo ganho</span>
+              <strong>{player.seasonStats.duelsWon}</strong>
+            </div>
+          </div>
         </article>
       </section>
 
