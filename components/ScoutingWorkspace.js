@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+import { useAccess } from "@/components/AccessProvider";
 import { buildFavoriteCollectionsFromScouting, buildScoutingReport, parseListField } from "@/lib/report-utils";
 
 const initialForm = {
@@ -101,6 +102,7 @@ export default function ScoutingWorkspace({
   title = "Central de scouting",
   subtitle = "CRUD completo integrado ao Back4App para criacao, edicao e exclusao de observacoes."
 }) {
+  const { isAdmin, hasAdvancedAccess, isCommon } = useAccess();
   const [form, setForm] = useState(initialForm);
   const [items, setItems] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -358,7 +360,11 @@ export default function ScoutingWorkspace({
         <div>
           <span className="eyebrow">Scouting Room</span>
           <h1>{title}</h1>
-          <p>{subtitle}</p>
+          <p>
+            {isCommon
+              ? "Acompanhe shortlist, favoritos e fichas de forma mais direta."
+              : subtitle}
+          </p>
         </div>
 
         <div className="mini-kpis four-up">
@@ -372,6 +378,7 @@ export default function ScoutingWorkspace({
       </section>
 
       <section className="workbench-grid">
+        {isAdmin ? (
         <article className="glass-panel form-panel">
           <div className="section-heading">
             <div>
@@ -551,6 +558,37 @@ export default function ScoutingWorkspace({
           {message ? <p className="feedback">{message}</p> : null}
           {backStatus ? <p className="warning">{backStatus}</p> : null}
         </article>
+        ) : (
+          <article className="glass-panel form-panel">
+            <div className="section-heading">
+              <div>
+                <p className="panel-tag">Edicao manual</p>
+                <h2>Acesso restrito ao admin</h2>
+              </div>
+              <span className="badge">Somente leitura</span>
+            </div>
+
+            <p>
+              O cadastro, a edicao e a atualizacao manual dos relatorios ficam liberados apenas para o
+              perfil admin. O modo profissional continua com acesso de leitura aprofundada.
+            </p>
+
+            <div className="workflow-list">
+              <div className="workflow-row">
+                <span className="standing-index">1</span>
+                <p>Usuario padrao: leitura direta de shortlist, favoritos e perfis.</p>
+              </div>
+              <div className="workflow-row">
+                <span className="standing-index">2</span>
+                <p>Profissional: leitura profunda, comparativos e contexto mais tecnico.</p>
+              </div>
+              <div className="workflow-row">
+                <span className="standing-index">3</span>
+                <p>Admin: operacao manual completa do modulo.</p>
+              </div>
+            </div>
+          </article>
+        )}
 
         <article className="glass-panel list-panel">
           <div className="section-heading">
@@ -660,33 +698,39 @@ export default function ScoutingWorkspace({
                 </div>
 
                 <div className="card-actions">
-                  <button
-                    className={`icon-action favorite-action ${item.isFavorite ? "favorite-active" : ""}`}
-                    onClick={() => handleFavoriteToggle(item)}
-                    title="Marcar como favorito"
-                    aria-label={`Marcar ${item.playerName} como favorito`}
-                  >
-                    <StarIcon filled={item.isFavorite} />
-                    <span>{item.isFavorite ? "Favorito" : "Favoritar"}</span>
-                  </button>
-                  <button
-                    className="icon-action edit-action"
-                    onClick={() => handleEdit(item)}
-                    title="Editar registro"
-                    aria-label={`Editar observacao de ${item.playerName}`}
-                  >
-                    <EditIcon />
-                    <span>Editar</span>
-                  </button>
-                  <button
-                    className="icon-action delete-action"
-                    onClick={() => handleDelete(item.id)}
-                    title="Excluir registro"
-                    aria-label={`Excluir observacao de ${item.playerName}`}
-                  >
-                    <TrashIcon />
-                    <span>Excluir</span>
-                  </button>
+                  {isAdmin ? (
+                    <>
+                      <button
+                        className={`icon-action favorite-action ${item.isFavorite ? "favorite-active" : ""}`}
+                        onClick={() => handleFavoriteToggle(item)}
+                        title="Marcar como favorito"
+                        aria-label={`Marcar ${item.playerName} como favorito`}
+                      >
+                        <StarIcon filled={item.isFavorite} />
+                        <span>{item.isFavorite ? "Favorito" : "Favoritar"}</span>
+                      </button>
+                      <button
+                        className="icon-action edit-action"
+                        onClick={() => handleEdit(item)}
+                        title="Editar registro"
+                        aria-label={`Editar observacao de ${item.playerName}`}
+                      >
+                        <EditIcon />
+                        <span>Editar</span>
+                      </button>
+                      <button
+                        className="icon-action delete-action"
+                        onClick={() => handleDelete(item.id)}
+                        title="Excluir registro"
+                        aria-label={`Excluir observacao de ${item.playerName}`}
+                      >
+                        <TrashIcon />
+                        <span>Excluir</span>
+                      </button>
+                    </>
+                  ) : (
+                    <span className="badge">Leitura</span>
+                  )}
                 </div>
               </article>
             ))}
@@ -785,42 +829,54 @@ export default function ScoutingWorkspace({
                 <p>{selectedReport.summary}</p>
               </div>
 
-              <div className="report-columns">
-                <div className="report-block">
-                  <span className="detail-label">Pontos fortes</span>
-                  <ul className="feature-list compact-list">
-                    {selectedReport.strengths.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
+              {hasAdvancedAccess || isAdmin ? (
+                <>
+                  <div className="report-columns">
+                    <div className="report-block">
+                      <span className="detail-label">Pontos fortes</span>
+                      <ul className="feature-list compact-list">
+                        {selectedReport.strengths.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
 
-                <div className="report-block">
-                  <span className="detail-label">Riscos e alertas</span>
-                  <ul className="feature-list compact-list">
-                    {selectedReport.risks.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+                    <div className="report-block">
+                      <span className="detail-label">Riscos e alertas</span>
+                      <ul className="feature-list compact-list">
+                        {selectedReport.risks.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
 
-              <div className="report-columns">
-                <div className="report-block">
-                  <span className="detail-label">Recomendacao</span>
-                  <p>{selectedReport.recommendation}</p>
-                </div>
+                  <div className="report-columns">
+                    <div className="report-block">
+                      <span className="detail-label">Recomendacao</span>
+                      <p>{selectedReport.recommendation}</p>
+                    </div>
 
-                <div className="report-block">
-                  <span className="detail-label">Proxima acao</span>
-                  <p>{selectedReport.nextAction}</p>
-                </div>
-              </div>
+                    <div className="report-block">
+                      <span className="detail-label">Proxima acao</span>
+                      <p>{selectedReport.nextAction}</p>
+                    </div>
+                  </div>
 
-              <div className="report-block">
-                <span className="detail-label">Observacoes complementares</span>
-                <p>{selectedReport.notes}</p>
-              </div>
+                  <div className="report-block">
+                    <span className="detail-label">Observacoes complementares</span>
+                    <p>{selectedReport.notes}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="report-block">
+                  <span className="detail-label">Leitura direta</span>
+                  <p>
+                    {selectedReport.playerName} vem sendo acompanhado em {selectedReport.club} com nota{" "}
+                    {selectedReport.rating} e status {selectedReport.status.toLowerCase()}.
+                  </p>
+                </div>
+              )}
 
               {selectedReport.relatedProfiles.length > 0 ? (
                 <div className="report-link-list">

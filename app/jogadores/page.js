@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
+import { useAccess } from "@/components/AccessProvider";
 import { dataSourceSummary, spotlightPlayers } from "@/lib/football-data";
 
 export default function PlayersPage() {
+  const { isCommon } = useAccess();
   const topRating = [...spotlightPlayers].sort((a, b) => b.rating - a.rating)[0];
 
   return (
@@ -12,8 +16,9 @@ export default function PlayersPage() {
           <span className="eyebrow">Player Reports</span>
           <h1>Relatorios de atletas</h1>
           <p>
-            Perfis individuais com leitura tecnica, contexto de mercado, recomendacoes de
-            monitoramento e analise voltada para decisao profissional.
+            {isCommon
+              ? "Veja rapidamente o momento do atleta, os sinais principais e uma ficha-base pronta para consulta."
+              : "Perfis individuais com leitura tecnica, contexto de mercado, recomendacoes de monitoramento e analise voltada para decisao profissional."}
           </p>
         </div>
 
@@ -55,14 +60,18 @@ export default function PlayersPage() {
                 <span className="detail-label">Funcao</span>
                 <strong>{player.role}</strong>
               </div>
-              <div>
-                <span className="detail-label">Mercado</span>
-                <strong>{player.marketMoment}</strong>
-              </div>
-              <div>
-                <span className="detail-label">Contrato</span>
-                <strong>{player.contractStatus}</strong>
-              </div>
+              {!isCommon ? (
+                <>
+                  <div>
+                    <span className="detail-label">Mercado</span>
+                    <strong>{player.marketMoment}</strong>
+                  </div>
+                  <div>
+                    <span className="detail-label">Contrato</span>
+                    <strong>{player.contractStatus}</strong>
+                  </div>
+                </>
+              ) : null}
             </div>
 
             <div className="report-tag-row">

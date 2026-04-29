@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
+import { useAccess } from "@/components/AccessProvider";
 import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
+  const { isCommon } = useAccess();
   const averageRating = (
     featuredTeams.reduce((sum, team) => sum + team.rating, 0) / featuredTeams.length
   ).toFixed(1);
@@ -14,8 +18,9 @@ export default function TeamsPage() {
           <span className="eyebrow">Club Reports</span>
           <h1>Relatorios de times</h1>
           <p>
-            Visao executiva para profissionais de scouting, coordenacao e mercado com leitura de
-            identidade, risco, necessidade de elenco e oportunidade de monitoramento.
+            {isCommon
+              ? "Acompanhe rapidamente o momento dos clubes, os ultimos sinais competitivos e uma ficha-base de cada time."
+              : "Visao executiva para profissionais de scouting, coordenacao e mercado com leitura de identidade, risco, necessidade de elenco e oportunidade de monitoramento."}
           </p>
         </div>
 
@@ -29,8 +34,8 @@ export default function TeamsPage() {
             <span>Rating medio</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>Profissional</strong>
-            <span>Uso orientado a decisao</span>
+            <strong>{isCommon ? "Direto" : "Profissional"}</strong>
+            <span>{isCommon ? "Leitura rapida" : "Uso orientado a decisao"}</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{dataSourceSummary.status}</strong>
@@ -61,10 +66,12 @@ export default function TeamsPage() {
                 <span className="detail-label">Momento</span>
                 <strong>{team.phase}</strong>
               </div>
-              <div>
-                <span className="detail-label">Foco de mercado</span>
-                <strong>{team.marketFocus}</strong>
-              </div>
+              {!isCommon ? (
+                <div>
+                  <span className="detail-label">Foco de mercado</span>
+                  <strong>{team.marketFocus}</strong>
+                </div>
+              ) : null}
             </div>
 
             <div className="report-tag-row">

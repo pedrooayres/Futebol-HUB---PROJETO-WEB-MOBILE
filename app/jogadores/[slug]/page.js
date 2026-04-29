@@ -1,3 +1,4 @@
+import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
 import { notFound } from "next/navigation";
 
 import { getPlayerBySlug, getTeamBySlug, spotlightPlayers } from "@/lib/football-data";
@@ -156,6 +157,30 @@ export default async function PlayerProfilePage({ params }) {
         </article>
       </section>
 
+      <CommonOnly>
+        <section className="professional-grid">
+          <article className="glass-panel">
+            <p className="panel-tag">Resumo rapido</p>
+            <h2>Leitura direta do atleta</h2>
+            <p>{player.reportSummary}</p>
+            <p>
+              {player.role} • {player.club} • {player.status}
+            </p>
+          </article>
+
+          <article className="glass-panel">
+            <p className="panel-tag">Momento</p>
+            <h2>Ultimos sinais</h2>
+            <ul className="feature-list">
+              {player.recentMatches.slice(0, 3).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </section>
+      </CommonOnly>
+
+      <AdvancedOnly>
       <section className="professional-grid">
         <article className="glass-panel">
           <p className="panel-tag">Forma e disponibilidade</p>
@@ -264,6 +289,7 @@ export default async function PlayerProfilePage({ params }) {
           ))}
         </ul>
       </article>
+      </AdvancedOnly>
     </main>
   );
 }

@@ -140,6 +140,69 @@ img {
   max-width: 420px;
 }
 
+.access-switcher {
+  flex: 0 0 auto;
+}
+
+.access-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 9, 18, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.access-modal {
+  width: min(900px, 100%);
+  display: grid;
+  gap: 18px;
+}
+
+.access-card {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.admin-unlock-box {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-unlock-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
+.admin-unlock-form input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  outline: none;
+}
+
+.mode-summary-card {
+  align-content: start;
+}
+
 .global-search-form {
   display: grid;
   grid-template-columns: 1fr auto;

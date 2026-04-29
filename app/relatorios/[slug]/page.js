@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
 import { notFound } from "next/navigation";
 
 import { getMarketReportBySlug, marketReports } from "@/lib/football-data";
@@ -107,6 +108,20 @@ export default async function MarketReportPage({ params }) {
         </article>
       </section>
 
+      <CommonOnly>
+        <section className="professional-grid">
+          <article className="glass-panel">
+            <p className="panel-tag">Resumo rapido</p>
+            <h2>Leitura direta</h2>
+            <p>{report.executiveSummary}</p>
+            <p>
+              {report.club} • {report.profileType} • {report.status}
+            </p>
+          </article>
+        </section>
+      </CommonOnly>
+
+      <AdvancedOnly>
       <article className="glass-panel">
         <p className="panel-tag">Recomendacoes</p>
         <h2>Encaminhamento de monitoramento</h2>
@@ -124,6 +139,7 @@ export default async function MarketReportPage({ params }) {
           ))}
         </div>
       </article>
+      </AdvancedOnly>
     </main>
   );
 }

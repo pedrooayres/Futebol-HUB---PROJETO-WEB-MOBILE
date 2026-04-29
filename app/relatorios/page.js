@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
+import { useAccess } from "@/components/AccessProvider";
 import { dataSourceSummary, marketReports } from "@/lib/football-data";
 
 export default function ReportsPage() {
+  const { isCommon } = useAccess();
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
@@ -10,8 +14,9 @@ export default function ReportsPage() {
           <span className="eyebrow">Market Reports</span>
           <h1>Relatorios externos</h1>
           <p>
-            Biblioteca de leituras de mercado para ampliar a plataforma alem do CRUD interno, com
-            foco em contexto competitivo, encaixe e oportunidade.
+            {isCommon
+              ? "Biblioteca de leituras prontas para abrir um nome e entender rapidamente o contexto geral."
+              : "Biblioteca de leituras de mercado para ampliar a plataforma alem do CRUD interno, com foco em contexto competitivo, encaixe e oportunidade."}
           </p>
         </div>
 
@@ -53,14 +58,18 @@ export default function ReportsPage() {
                 <span className="detail-label">Perfil</span>
                 <strong>{report.profileType}</strong>
               </div>
-              <div>
-                <span className="detail-label">Janela</span>
-                <strong>{report.marketWindow}</strong>
-              </div>
-              <div>
-                <span className="detail-label">Horizonte</span>
-                <strong>{report.horizon}</strong>
-              </div>
+              {!isCommon ? (
+                <>
+                  <div>
+                    <span className="detail-label">Janela</span>
+                    <strong>{report.marketWindow}</strong>
+                  </div>
+                  <div>
+                    <span className="detail-label">Horizonte</span>
+                    <strong>{report.horizon}</strong>
+                  </div>
+                </>
+              ) : null}
             </div>
 
             <div className="report-tag-row">

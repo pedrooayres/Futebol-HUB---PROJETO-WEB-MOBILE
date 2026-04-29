@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { useAccess } from "@/components/AccessProvider";
+import QuickModeSummary from "@/components/QuickModeSummary";
 import StandingsPreview from "@/components/StandingsPreview";
 
 const coreModules = [
@@ -38,6 +40,7 @@ const useCases = [
 ];
 
 export default function HomeDashboard() {
+  const { isCommon, hasAdvancedAccess, isAdmin } = useAccess();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [backStatus, setBackStatus] = useState("");
@@ -122,6 +125,43 @@ export default function HomeDashboard() {
       </section>
 
       <section className="professional-grid">
+        <QuickModeSummary
+          commonTitle="Usuario padrao"
+          commonText="Acompanhe resultados, contexto rapido e perfis resumidos sem excesso de camada tecnica."
+          professionalTitle="Profissional"
+          professionalText="Leia scouting, relatorios externos, forma recente e contexto competitivo com maior profundidade."
+          adminTitle="Admin"
+          adminText="Gerencie o produto, atualize dados manualmente e opere a base com controle total."
+        />
+
+        {isCommon ? (
+          <article className="glass-panel">
+            <div className="section-heading">
+              <div>
+                <p className="panel-tag">Atalhos</p>
+                <h2>O que acompanhar agora</h2>
+              </div>
+            </div>
+
+            <div className="workflow-list">
+              <div className="workflow-row">
+                <span className="standing-index">1</span>
+                <p>Veja como um time vem jogando nos ultimos jogos.</p>
+              </div>
+              <div className="workflow-row">
+                <span className="standing-index">2</span>
+                <p>Busque um atleta para abrir uma ficha-base imediata.</p>
+              </div>
+              <div className="workflow-row">
+                <span className="standing-index">3</span>
+                <p>Consulte o ranking para descobrir o momento competitivo.</p>
+              </div>
+            </div>
+          </article>
+        ) : null}
+      </section>
+
+      <section className="professional-grid">
         <article className="glass-panel">
           <div className="section-heading">
             <div>
@@ -153,6 +193,12 @@ export default function HomeDashboard() {
               <span key={item}>{item}</span>
             ))}
           </div>
+
+          {hasAdvancedAccess || isAdmin ? (
+            <p className="warning">
+              Este modo libera leitura aprofundada de perfis, relatorios mais densos e ambiente de scouting mais detalhado.
+            </p>
+          ) : null}
         </article>
       </section>
 

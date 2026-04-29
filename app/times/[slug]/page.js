@@ -1,3 +1,4 @@
+import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
 import { notFound } from "next/navigation";
 
 import { featuredTeams, getTeamBySlug } from "@/lib/football-data";
@@ -149,6 +150,32 @@ export default async function TeamProfilePage({ params }) {
         </article>
       </section>
 
+      <CommonOnly>
+        <section className="professional-grid">
+          <article className="glass-panel">
+            <p className="panel-tag">Resumo rapido</p>
+            <h2>Leitura direta do time</h2>
+            <p>{team.reportSummary}</p>
+            <p>
+              Sistema {team.system} • Momento {team.phase} • Origem {team.source}
+            </p>
+          </article>
+
+          <article className="glass-panel">
+            <p className="panel-tag">Ultimos sinais</p>
+            <h2>Forma recente</h2>
+            <ul className="feature-list">
+              {team.recentForm.slice(0, 3).map((match) => (
+                <li key={`${match.opponent}-${match.score}`}>
+                  {match.opponent} | {match.score} | {match.venue}
+                </li>
+              ))}
+            </ul>
+          </article>
+        </section>
+      </CommonOnly>
+
+      <AdvancedOnly>
       <section className="professional-grid">
         <article className="glass-panel">
           <p className="panel-tag">Forma recente</p>
@@ -282,6 +309,7 @@ export default async function TeamProfilePage({ params }) {
           </div>
         </article>
       </section>
+      </AdvancedOnly>
     </main>
   );
 }
