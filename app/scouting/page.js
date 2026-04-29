@@ -7,7 +7,7 @@ export default function ScoutingPage() {
     <Suspense fallback={null}>
       <ScoutingWorkspace
         title="Mesa de scouting"
-        subtitle="Ambiente de trabalho para registrar relatorios, priorizar atletas, montar shortlist e exportar fichas para decisao tecnica."
+        subtitle="Ambiente de trabalho para registrar relatorios, organizar favoritos, montar shortlist e exportar fichas para decisao tecnica."
       />
     </Suspense>
   );

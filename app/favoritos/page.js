@@ -1,5 +1,5 @@
-import FavoritesWorkspace from "@/components/FavoritesWorkspace";
+import { redirect } from "next/navigation";
 
 export default function FavoritesPage() {
-  return <FavoritesWorkspace />;
+  redirect("/scouting");
 }

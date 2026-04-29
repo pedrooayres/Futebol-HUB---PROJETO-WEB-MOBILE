@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { buildScoutingReport, parseListField } from "@/lib/report-utils";
+import { buildFavoriteCollectionsFromScouting, buildScoutingReport, parseListField } from "@/lib/report-utils";
 
 const initialForm = {
   playerName: "",
@@ -206,6 +206,7 @@ export default function ScoutingWorkspace({
     () => filteredItems.filter((item) => item.isFavorite || item.status === "Aprovado" || item.rating >= 88).slice(0, 5),
     [filteredItems]
   );
+  const favoriteCollections = useMemo(() => buildFavoriteCollectionsFromScouting(items), [items]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -835,6 +836,60 @@ export default function ScoutingWorkspace({
             <p>Selecione um relatorio na lista para visualizar a ficha completa e exportar.</p>
           )}
         </article>
+      </section>
+
+      <section className="glass-panel">
+        <div className="section-heading">
+          <div>
+            <p className="panel-tag">Favoritos integrados</p>
+            <h2>Colecoes operacionais do scouting</h2>
+          </div>
+          <span className="badge accent">{favoriteCollections.length} colecoes</span>
+        </div>
+
+        <div className="card-grid">
+          {favoriteCollections.map((item) => (
+            <article key={`${item.slug}-${item.title}`} className="favorite-card favorite-full-card">
+              <div className="section-heading">
+                <div>
+                  <p className="panel-tag">Colecao</p>
+                  <h3>{item.title}</h3>
+                </div>
+                <span className="badge">{item.priority}</span>
+              </div>
+
+              <p>{item.text}</p>
+              <div className="team-info-grid">
+                <div>
+                  <span className="detail-label">Objetivo</span>
+                  <strong>{item.objective}</strong>
+                </div>
+                <div>
+                  <span className="detail-label">Responsavel</span>
+                  <strong>{item.owner}</strong>
+                </div>
+                <div>
+                  <span className="detail-label">Proxima acao</span>
+                  <strong>{item.nextAction}</strong>
+                </div>
+              </div>
+
+              <ul className="feature-list">
+                {item.items.map((entry) => (
+                  <li key={entry}>{entry}</li>
+                ))}
+              </ul>
+
+              <div className="report-link-list">
+                {item.relatedProfiles?.slice(0, 3).map((profile) => (
+                  <Link key={profile} href={profile} className="inline-link">
+                    Abrir perfil relacionado
+                  </Link>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </section>
   );

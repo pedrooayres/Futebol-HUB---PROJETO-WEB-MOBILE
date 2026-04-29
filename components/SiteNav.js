@@ -10,8 +10,6 @@ const navItems = [
   { href: "/jogadores", label: "Jogadores" },
   { href: "/ranking", label: "Ranking" },
   { href: "/relatorios", label: "Relatorios" },
-  { href: "/pipeline", label: "Pipeline" },
-  { href: "/favoritos", label: "Favoritos" },
   { href: "/scouting", label: "Scouting" }
 ];
 
