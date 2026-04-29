@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { buildSearchIndex, searchEntries } from "@/lib/report-utils";
+import { buildGeneratedSearchEntries, buildSearchIndex, searchEntries } from "@/lib/report-utils";
 import { back4appRequest, hasBack4AppConfig } from "@/lib/back4app";
 
 async function getScoutingItems() {
@@ -22,7 +22,9 @@ export async function GET(request) {
   const limit = Number(searchParams.get("limit") || 8);
   const scoutingItems = await getScoutingItems();
   const index = buildSearchIndex(scoutingItems);
-  const results = searchEntries(index, query).slice(0, limit);
+  const baseResults = searchEntries(index, query);
+  const generatedResults = buildGeneratedSearchEntries(query, baseResults);
+  const results = [...baseResults, ...generatedResults].slice(0, limit);
 
   return NextResponse.json({
     query,
