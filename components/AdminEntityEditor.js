@@ -45,37 +45,12 @@ const FIELD_CONFIG = {
 
 function buildInitialForm(type, entity) {
   const safeEntity = entity ?? {};
+  const fields = FIELD_CONFIG[type] || FIELD_CONFIG.reports;
 
-  if (type === "teams") {
-    return {
-      name: safeEntity.name || "",
-      league: safeEntity.league || "",
-      system: safeEntity.system || "",
-      phase: safeEntity.phase || "",
-      marketFocus: safeEntity.marketFocus || "",
-      reportSummary: safeEntity.reportSummary || ""
-    };
-  }
-
-  if (type === "players") {
-    return {
-      name: safeEntity.name || "",
-      club: safeEntity.club || "",
-      role: safeEntity.role || "",
-      status: safeEntity.status || "",
-      marketMoment: safeEntity.marketMoment || "",
-      reportSummary: safeEntity.reportSummary || ""
-    };
-  }
-
-  return {
-    subject: safeEntity.subject || "",
-    club: safeEntity.club || "",
-    status: safeEntity.status || "",
-    profileType: safeEntity.profileType || "",
-    marketWindow: safeEntity.marketWindow || "",
-    executiveSummary: safeEntity.executiveSummary || ""
-  };
+  return fields.reduce((accumulator, field) => {
+    accumulator[field.key] = safeEntity[field.key] || "";
+    return accumulator;
+  }, {});
 }
 
 export default function AdminEntityEditor({ open, onClose, type, entity }) {
@@ -109,8 +84,15 @@ export default function AdminEntityEditor({ open, onClose, type, entity }) {
   return (
     <div className="access-overlay">
       <div className="glass-panel access-modal">
-        <p className="panel-tag">Edicao manual</p>
-        <h2>{entity.name || entity.subject}</h2>
+        <div className="section-heading">
+          <div>
+            <p className="panel-tag">Edicao manual</p>
+            <h2>{entity.name || entity.subject}</h2>
+          </div>
+          <button type="button" className="primary-button" onClick={handleSave}>
+            Salvar
+          </button>
+        </div>
         <p>Essas alteracoes ficam disponiveis para o admin no navegador atual e sobrepoem os dados-base do perfil.</p>
 
         <div className="admin-editor-grid">
@@ -126,7 +108,7 @@ export default function AdminEntityEditor({ open, onClose, type, entity }) {
           ))}
         </div>
 
-        <div className="form-actions">
+        <div className="form-actions admin-editor-actions">
           <button type="button" className="primary-button" onClick={handleSave}>
             Salvar ajuste
           </button>

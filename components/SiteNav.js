@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { useAccess } from "@/components/AccessProvider";
 import GlobalSearch from "@/components/GlobalSearch";
 
 const navItems = [
@@ -15,6 +17,9 @@ const navItems = [
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const { role, ready, logoutRole, reopenSelector } = useAccess();
+  const modeLabel =
+    role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin";
 
   return (
     <header className="site-header">
@@ -44,6 +49,17 @@ export default function SiteNav() {
         </nav>
 
         <GlobalSearch />
+
+        {ready && role ? (
+          <div className="nav-session-actions">
+            <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
+              {modeLabel}
+            </button>
+            <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
+              Logout
+            </button>
+          </div>
+        ) : null}
       </div>
     </header>
   );
