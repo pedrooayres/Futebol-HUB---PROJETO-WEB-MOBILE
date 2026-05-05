@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, marketReports } from "@/lib/football-data";
 
 export default function ReportsPage() {
-  const { isCommon, isAdmin } = useAccess();
+  const { isCommon } = useAccess();
   const { applyOverride } = useEntityOverrides();
-  const [editingReport, setEditingReport] = useState(null);
   const reports = useMemo(() => marketReports.map((report) => applyOverride("reports", report)), [applyOverride]);
   return (
     <main className="page-shell page-stack">
@@ -56,11 +54,6 @@ export default function ReportsPage() {
               </div>
               <div className="result-badge-row">
                 <span className="badge accent">{report.rating}</span>
-                {isAdmin ? (
-                  <button type="button" className="icon-mini-button" onClick={() => setEditingReport(report)}>
-                    Editar
-                  </button>
-                ) : null}
               </div>
             </div>
 
@@ -97,13 +90,6 @@ export default function ReportsPage() {
           </article>
         ))}
       </section>
-
-      <AdminEntityEditor
-        open={Boolean(editingReport)}
-        entity={editingReport}
-        type="reports"
-        onClose={() => setEditingReport(null)}
-      />
     </main>
   );
 }

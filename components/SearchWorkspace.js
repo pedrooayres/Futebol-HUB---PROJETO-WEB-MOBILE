@@ -4,41 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import AdminEntityEditor from "@/components/AdminEntityEditor";
-import { useAccess } from "@/components/AccessProvider";
-import { useEntityOverrides } from "@/components/EntityOverridesProvider";
-import { getMarketReportBySlug, getPlayerBySlug, getTeamBySlug } from "@/lib/football-data";
-
-function resolveEditableEntity(item) {
-  if (!item?.href) {
-    return null;
-  }
-
-  const slug = item.href.split("/").filter(Boolean).pop();
-
-  if (item.type === "time") {
-    return { type: "teams", entity: getTeamBySlug(slug) };
-  }
-
-  if (item.type === "jogador") {
-    return { type: "players", entity: getPlayerBySlug(slug) };
-  }
-
-  if (item.type === "relatorio" && item.href.startsWith("/relatorios/")) {
-    return { type: "reports", entity: getMarketReportBySlug(slug) };
-  }
-
-  return null;
-}
-
 export default function SearchWorkspace() {
-  const { isAdmin } = useAccess();
-  const { applyOverride } = useEntityOverrides();
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState(null);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -106,48 +76,28 @@ export default function SearchWorkspace() {
         {!loading && query && results.length === 0 ? <p>Nenhum resultado encontrado para essa pesquisa.</p> : null}
         {!loading
           ? results.map((item) => {
-              const editable = resolveEditableEntity(item);
-              const resolvedEntity =
-                editable?.entity && editable?.type ? applyOverride(editable.type, editable.entity) : null;
-
               return (
-              <article key={item.id} className="glass-panel report-index-card">
-                <div className="section-heading">
-                  <div>
-                    <p className="panel-tag">{item.type}</p>
-                    <h2>{item.title}</h2>
+                <article key={item.id} className="glass-panel report-index-card">
+                  <div className="section-heading">
+                    <div>
+                      <p className="panel-tag">{item.type}</p>
+                      <h2>{item.title}</h2>
+                    </div>
+                    <div className="result-badge-row">
+                      <span className="badge">{item.source}</span>
+                      <span className="badge">{item.subtitle}</span>
+                    </div>
                   </div>
-                  <div className="result-badge-row">
-                    <span className="badge">{item.source}</span>
-                    <span className="badge">{item.subtitle}</span>
-                    {isAdmin && editable?.type && resolvedEntity ? (
-                      <button
-                        type="button"
-                        className="icon-mini-button"
-                        onClick={() => setEditing({ type: editable.type, entity: resolvedEntity })}
-                      >
-                        Editar
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
 
-                <p>{item.description}</p>
-                <Link href={item.href} className="inline-link">
-                  Abrir resultado
-                </Link>
-              </article>
-            );
+                  <p>{item.description}</p>
+                  <Link href={item.href} className="inline-link">
+                    Abrir resultado
+                  </Link>
+                </article>
+              );
             })
           : null}
       </section>
-
-      <AdminEntityEditor
-        open={Boolean(editing?.entity)}
-        entity={editing?.entity}
-        type={editing?.type || "teams"}
-        onClose={() => setEditing(null)}
-      />
     </main>
   );
 }

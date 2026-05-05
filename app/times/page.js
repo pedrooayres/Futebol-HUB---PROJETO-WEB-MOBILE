@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
-  const { isCommon, isAdmin } = useAccess();
+  const { isCommon } = useAccess();
   const { applyOverride } = useEntityOverrides();
-  const [editingTeam, setEditingTeam] = useState(null);
   const teams = useMemo(() => featuredTeams.map((team) => applyOverride("teams", team)), [applyOverride]);
   const averageRating = (
     teams.reduce((sum, team) => sum + team.rating, 0) / teams.length
@@ -60,11 +58,6 @@ export default function TeamsPage() {
               </div>
               <div className="result-badge-row">
                 <span className="badge accent">{team.rating}</span>
-                {isAdmin ? (
-                  <button type="button" className="icon-mini-button" onClick={() => setEditingTeam(team)}>
-                    Editar
-                  </button>
-                ) : null}
               </div>
             </div>
 
@@ -99,13 +92,6 @@ export default function TeamsPage() {
           </article>
         ))}
       </section>
-
-      <AdminEntityEditor
-        open={Boolean(editingTeam)}
-        entity={editingTeam}
-        type="teams"
-        onClose={() => setEditingTeam(null)}
-      />
     </main>
   );
 }

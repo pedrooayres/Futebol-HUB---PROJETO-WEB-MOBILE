@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, spotlightPlayers } from "@/lib/football-data";
 
 export default function PlayersPage() {
-  const { isCommon, isAdmin } = useAccess();
+  const { isCommon } = useAccess();
   const { applyOverride } = useEntityOverrides();
-  const [editingPlayer, setEditingPlayer] = useState(null);
   const players = useMemo(
     () => spotlightPlayers.map((player) => applyOverride("players", player)),
     [applyOverride]
@@ -61,11 +59,6 @@ export default function PlayersPage() {
               </div>
               <div className="result-badge-row">
                 <span className="badge accent">{player.rating}</span>
-                {isAdmin ? (
-                  <button type="button" className="icon-mini-button" onClick={() => setEditingPlayer(player)}>
-                    Editar
-                  </button>
-                ) : null}
               </div>
             </div>
 
@@ -102,13 +95,6 @@ export default function PlayersPage() {
           </article>
         ))}
       </section>
-
-      <AdminEntityEditor
-        open={Boolean(editingPlayer)}
-        entity={editingPlayer}
-        type="players"
-        onClose={() => setEditingPlayer(null)}
-      />
     </main>
   );
 }

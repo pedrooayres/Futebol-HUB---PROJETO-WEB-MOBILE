@@ -4,6 +4,45 @@ import { useEffect, useState } from "react";
 
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 
+const FIELD_CONFIG = {
+  teams: [
+    { key: "name", label: "Nome do time" },
+    { key: "league", label: "Liga" },
+    { key: "coach", label: "Comissao tecnica" },
+    { key: "system", label: "Sistema base" },
+    { key: "phase", label: "Momento competitivo" },
+    { key: "marketFocus", label: "Foco de mercado" },
+    { key: "profile", label: "Perfil competitivo", multiline: true },
+    { key: "style", label: "Estilo de jogo", multiline: true },
+    { key: "moment", label: "Leitura de momento", multiline: true },
+    { key: "reportSummary", label: "Resumo executivo", multiline: true }
+  ],
+  players: [
+    { key: "name", label: "Nome do atleta" },
+    { key: "club", label: "Clube" },
+    { key: "role", label: "Funcao" },
+    { key: "age", label: "Idade" },
+    { key: "foot", label: "Pe dominante" },
+    { key: "nationality", label: "Nacionalidade" },
+    { key: "height", label: "Altura" },
+    { key: "status", label: "Status interno" },
+    { key: "contractStatus", label: "Leitura contratual" },
+    { key: "marketMoment", label: "Momento de mercado" },
+    { key: "profile", label: "Perfil competitivo", multiline: true },
+    { key: "summary", label: "Sintese tecnica", multiline: true },
+    { key: "reportSummary", label: "Resumo executivo", multiline: true }
+  ],
+  reports: [
+    { key: "subject", label: "Assunto" },
+    { key: "club", label: "Clube" },
+    { key: "status", label: "Status" },
+    { key: "profileType", label: "Tipo de perfil" },
+    { key: "horizon", label: "Horizonte" },
+    { key: "marketWindow", label: "Janela de mercado" },
+    { key: "executiveSummary", label: "Resumo executivo", multiline: true }
+  ]
+};
+
 function buildInitialForm(type, entity) {
   const safeEntity = entity ?? {};
 
@@ -42,6 +81,7 @@ function buildInitialForm(type, entity) {
 export default function AdminEntityEditor({ open, onClose, type, entity }) {
   const { saveOverride, clearOverride } = useEntityOverrides();
   const [form, setForm] = useState(buildInitialForm(type, entity));
+  const fields = FIELD_CONFIG[type] || FIELD_CONFIG.reports;
 
   useEffect(() => {
     setForm(buildInitialForm(type, entity));
@@ -74,13 +114,13 @@ export default function AdminEntityEditor({ open, onClose, type, entity }) {
         <p>Essas alteracoes ficam disponiveis para o admin no navegador atual e sobrepoem os dados-base do perfil.</p>
 
         <div className="admin-editor-grid">
-          {Object.entries(form).map(([key, value]) => (
+          {fields.map(({ key, label, multiline }) => (
             <label key={key} className="scout-form">
-              <span className="detail-label">{key}</span>
-              {String(value).length > 80 ? (
-                <textarea name={key} value={value} onChange={handleChange} rows="4" />
+              <span className="detail-label">{label}</span>
+              {multiline ? (
+                <textarea name={key} value={form[key] || ""} onChange={handleChange} rows="4" />
               ) : (
-                <input name={key} value={value} onChange={handleChange} />
+                <input name={key} value={form[key] || ""} onChange={handleChange} />
               )}
             </label>
           ))}
