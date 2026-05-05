@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AccessProvider } from "@/components/AccessProvider";
 import AccessSelector from "@/components/AccessSelector";
+import { EntityOverridesProvider } from "@/components/EntityOverridesProvider";
 import SiteNav from "@/components/SiteNav";
 
 export const metadata = {
@@ -13,9 +14,11 @@ export default function RootLayout({ children }) {
     <html lang="pt-BR">
       <body>
         <AccessProvider>
-          <SiteNav />
-          <AccessSelector />
-          {children}
+          <EntityOverridesProvider>
+            <SiteNav />
+            <AccessSelector />
+            {children}
+          </EntityOverridesProvider>
         </AccessProvider>
       </body>
     </html>

@@ -32,6 +32,13 @@ export function AccessProvider({ children }) {
     setAdminError("");
   }
 
+  function logoutRole() {
+    window.localStorage.removeItem(STORAGE_KEY);
+    setRole("");
+    setShowSelector(true);
+    setAdminError("");
+  }
+
   async function unlockAdmin(code) {
     setAdminLoading(true);
     setAdminError("");
@@ -70,6 +77,7 @@ export function AccessProvider({ children }) {
       setShowSelector,
       chooseRole,
       reopenSelector,
+      logoutRole,
       unlockAdmin,
       adminLoading,
       adminError,

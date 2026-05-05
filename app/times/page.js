@@ -1,14 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
+import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
+import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
-  const { isCommon } = useAccess();
+  const { isCommon, isAdmin } = useAccess();
+  const { applyOverride } = useEntityOverrides();
+  const [editingTeam, setEditingTeam] = useState(null);
+  const teams = useMemo(() => featuredTeams.map((team) => applyOverride("teams", team)), [applyOverride]);
   const averageRating = (
-    featuredTeams.reduce((sum, team) => sum + team.rating, 0) / featuredTeams.length
+    teams.reduce((sum, team) => sum + team.rating, 0) / teams.length
   ).toFixed(1);
 
   return (
@@ -26,7 +32,7 @@ export default function TeamsPage() {
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{featuredTeams.length}</strong>
+            <strong>{teams.length}</strong>
             <span>Relatorios ativos</span>
           </article>
           <article className="mini-kpi-card">
@@ -45,14 +51,21 @@ export default function TeamsPage() {
       </section>
 
       <section className="report-index-grid">
-        {featuredTeams.map((team) => (
+        {teams.map((team) => (
           <article key={team.slug} className="glass-panel report-index-card">
             <div className="section-heading">
               <div>
                 <p className="panel-tag">{team.league}</p>
                 <h2>{team.name}</h2>
               </div>
-              <span className="badge accent">{team.rating}</span>
+              <div className="result-badge-row">
+                <span className="badge accent">{team.rating}</span>
+                {isAdmin ? (
+                  <button type="button" className="icon-mini-button" onClick={() => setEditingTeam(team)}>
+                    Editar
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             <p>{team.reportSummary}</p>
@@ -86,6 +99,13 @@ export default function TeamsPage() {
           </article>
         ))}
       </section>
+
+      <AdminEntityEditor
+        open={Boolean(editingTeam)}
+        entity={editingTeam}
+        type="teams"
+        onClose={() => setEditingTeam(null)}
+      />
     </main>
   );
 }

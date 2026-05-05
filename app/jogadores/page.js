@@ -1,13 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
+import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
+import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, spotlightPlayers } from "@/lib/football-data";
 
 export default function PlayersPage() {
-  const { isCommon } = useAccess();
-  const topRating = [...spotlightPlayers].sort((a, b) => b.rating - a.rating)[0];
+  const { isCommon, isAdmin } = useAccess();
+  const { applyOverride } = useEntityOverrides();
+  const [editingPlayer, setEditingPlayer] = useState(null);
+  const players = useMemo(
+    () => spotlightPlayers.map((player) => applyOverride("players", player)),
+    [applyOverride]
+  );
+  const topRating = [...players].sort((a, b) => b.rating - a.rating)[0];
 
   return (
     <main className="page-shell page-stack">
@@ -24,7 +33,7 @@ export default function PlayersPage() {
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{spotlightPlayers.length}</strong>
+            <strong>{players.length}</strong>
             <span>Atletas priorizados</span>
           </article>
           <article className="mini-kpi-card">
@@ -43,14 +52,21 @@ export default function PlayersPage() {
       </section>
 
       <section className="report-index-grid">
-        {spotlightPlayers.map((player) => (
+        {players.map((player) => (
           <article key={player.slug} className="glass-panel report-index-card">
             <div className="section-heading">
               <div>
                 <p className="panel-tag">{player.club}</p>
                 <h2>{player.name}</h2>
               </div>
-              <span className="badge accent">{player.rating}</span>
+              <div className="result-badge-row">
+                <span className="badge accent">{player.rating}</span>
+                {isAdmin ? (
+                  <button type="button" className="icon-mini-button" onClick={() => setEditingPlayer(player)}>
+                    Editar
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             <p>{player.reportSummary}</p>
@@ -86,6 +102,13 @@ export default function PlayersPage() {
           </article>
         ))}
       </section>
+
+      <AdminEntityEditor
+        open={Boolean(editingPlayer)}
+        entity={editingPlayer}
+        type="players"
+        onClose={() => setEditingPlayer(null)}
+      />
     </main>
   );
 }

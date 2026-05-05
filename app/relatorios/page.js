@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
+import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
+import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { dataSourceSummary, marketReports } from "@/lib/football-data";
 
 export default function ReportsPage() {
-  const { isCommon } = useAccess();
+  const { isCommon, isAdmin } = useAccess();
+  const { applyOverride } = useEntityOverrides();
+  const [editingReport, setEditingReport] = useState(null);
+  const reports = useMemo(() => marketReports.map((report) => applyOverride("reports", report)), [applyOverride]);
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
@@ -22,7 +28,7 @@ export default function ReportsPage() {
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{marketReports.length}</strong>
+            <strong>{reports.length}</strong>
             <span>Relatorios publicados</span>
           </article>
           <article className="mini-kpi-card">
@@ -41,14 +47,21 @@ export default function ReportsPage() {
       </section>
 
       <section className="report-index-grid">
-        {marketReports.map((report) => (
+        {reports.map((report) => (
           <article key={report.slug} className="glass-panel report-index-card">
             <div className="section-heading">
               <div>
                 <p className="panel-tag">{report.club}</p>
                 <h2>{report.subject}</h2>
               </div>
-              <span className="badge accent">{report.rating}</span>
+              <div className="result-badge-row">
+                <span className="badge accent">{report.rating}</span>
+                {isAdmin ? (
+                  <button type="button" className="icon-mini-button" onClick={() => setEditingReport(report)}>
+                    Editar
+                  </button>
+                ) : null}
+              </div>
             </div>
 
             <p>{report.executiveSummary}</p>
@@ -84,6 +97,13 @@ export default function ReportsPage() {
           </article>
         ))}
       </section>
+
+      <AdminEntityEditor
+        open={Boolean(editingReport)}
+        entity={editingReport}
+        type="reports"
+        onClose={() => setEditingReport(null)}
+      />
     </main>
   );
 }

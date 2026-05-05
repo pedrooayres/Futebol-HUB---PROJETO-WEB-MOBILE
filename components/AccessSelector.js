@@ -12,24 +12,35 @@ export default function AccessSelector() {
     adminLoading,
     adminError,
     role,
-    reopenSelector
+    reopenSelector,
+    logoutRole
   } = useAccess();
   const [adminCode, setAdminCode] = useState("");
 
   if (!showSelector && role) {
     return (
-      <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
-        Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
-      </button>
+      <div className="access-control-row">
+        <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
+          Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
+        </button>
+        <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
+          Sair
+        </button>
+      </div>
     );
   }
 
   return (
     <>
       {role ? (
-        <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
-          Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
-        </button>
+        <div className="access-control-row">
+          <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
+            Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
+          </button>
+          <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
+            Sair
+          </button>
+        </div>
       ) : null}
 
       {showSelector ? (
