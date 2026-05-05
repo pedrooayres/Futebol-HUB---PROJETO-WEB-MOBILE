@@ -9,12 +9,20 @@ function getStatValue(stats, keys) {
 
 export default function StandingsPreview({ title = "Top 6 da Premier League", limit = 6 }) {
   const [table, setTable] = useState([]);
+  const [sourceLabel, setSourceLabel] = useState("Atualizacao automatica");
 
   useEffect(() => {
     async function loadStandings() {
       const response = await fetch("/api/standings");
       const data = await response.json();
       setTable((data.rows || []).slice(0, limit));
+      setSourceLabel(
+        data.source === "api-football"
+          ? "API-Football"
+          : data.source === "api"
+            ? "Standings API"
+            : "Fallback local"
+      );
     }
 
     loadStandings();
@@ -27,7 +35,7 @@ export default function StandingsPreview({ title = "Top 6 da Premier League", li
           <p className="panel-tag">API externa</p>
           <h2>{title}</h2>
         </div>
-        <span className="badge">Atualizacao automatica</span>
+        <span className="badge">{sourceLabel}</span>
       </div>
 
       <div className="standings-list">

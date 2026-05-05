@@ -199,6 +199,8 @@ export default function HomeDashboard() {
               Este modo libera leitura aprofundada de perfis, relatorios mais densos e ambiente de scouting mais detalhado.
             </p>
           ) : null}
+
+          <p className="warning">Base pronta para migracao progressiva com API-Football em ranking, times e jogadores.</p>
         </article>
       </section>
 

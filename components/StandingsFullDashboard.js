@@ -11,7 +11,7 @@ const LEAGUE_OPTIONS = [
   { id: "bra.1", label: "Brasileirao" }
 ];
 
-const SEASON_OPTIONS = ["2024", "2023", "2022", "2021"];
+const SEASON_OPTIONS = ["2025", "2024", "2023", "2022"];
 
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined || value === "") {
@@ -173,6 +173,7 @@ export default function StandingsFullDashboard() {
   const summary = payload?.summary;
   const leaders = payload?.leaders;
   const charts = payload?.charts;
+  const source = payload?.source || "fallback";
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -209,7 +210,7 @@ export default function StandingsFullDashboard() {
           <h1>Modo full da tabela</h1>
           <p>
             Leitura completa do campeonato com filtros, comparador entre clubes, tendencias e
-            indicadores derivados da API Football Standings.
+            indicadores derivados da camada de dados do produto, com suporte a API-Football.
           </p>
         </div>
 
@@ -225,6 +226,10 @@ export default function StandingsFullDashboard() {
           <article className="mini-kpi-card">
             <strong>{summary?.averageGoalsFor ?? 0}</strong>
             <span>Media de gols marcados</span>
+          </article>
+          <article className="mini-kpi-card">
+            <strong>{source === "api-football" ? "API-Football" : source === "api" ? "Standings API" : "Fallback"}</strong>
+            <span>Fonte ativa</span>
           </article>
         </div>
       </section>
@@ -265,6 +270,7 @@ export default function StandingsFullDashboard() {
 
       {loading ? <p>Carregando leitura completa da liga...</p> : null}
       {error ? <p className="warning">{error}</p> : null}
+      {!loading && payload?.message ? <p className="warning">{payload.message}</p> : null}
 
       {!loading && !error ? (
         <>

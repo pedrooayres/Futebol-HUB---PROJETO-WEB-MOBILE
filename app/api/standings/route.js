@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { getApiFootballStandings, hasApiFootballKey } from "@/lib/api-football";
 import { fallbackStandingsByLeague } from "@/lib/football-data";
 
 const DEFAULT_LEAGUE = "eng.1";
-const DEFAULT_SEASON = "2024";
+const DEFAULT_SEASON = "2025";
 const STANDINGS_HOSTS = [
   "https://api-football-standings.azharimm.dev",
   "https://api-football-standings.azharimm.site"
@@ -135,6 +136,11 @@ export async function GET(request) {
   const season = searchParams.get("season") || DEFAULT_SEASON;
 
   try {
+    if (hasApiFootballKey()) {
+      const payload = await getApiFootballStandings(leagueId, season);
+      return NextResponse.json(payload);
+    }
+
     let response = null;
     let data = null;
     let lastError = null;
