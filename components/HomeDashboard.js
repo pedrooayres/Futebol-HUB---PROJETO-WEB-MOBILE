@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAccess } from "@/components/AccessProvider";
+import NewsPanel from "@/components/NewsPanel";
 import QuickModeSummary from "@/components/QuickModeSummary";
 import StandingsPreview from "@/components/StandingsPreview";
 
@@ -263,6 +264,24 @@ export default function HomeDashboard() {
           <Link href="/scouting" className="inline-link">
             Abrir modulo completo
           </Link>
+        </article>
+      </section>
+
+      <section className="professional-grid">
+        <NewsPanel query="futebol OR football transfers OR champions league OR brasileirao" title="Radar de noticias do futebol" />
+
+        <article className="glass-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">Cobertura</p>
+              <h2>Camada multi-API</h2>
+            </div>
+          </div>
+          <ul className="feature-list">
+            <li>API-Football para competicoes, tabelas, jogos, times e jogadores.</li>
+            <li>GNews para noticias de clubes, ligas, atletas e mercado.</li>
+            <li>Admin pode complementar manualmente valor de mercado e leitura editorial.</li>
+          </ul>
         </article>
       </section>
     </main>

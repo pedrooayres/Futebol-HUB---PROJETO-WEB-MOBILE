@@ -5,6 +5,7 @@ import { useState } from "react";
 import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
+import NewsPanel from "@/components/NewsPanel";
 import PlayerLivePanel from "@/components/PlayerLivePanel";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 
@@ -61,6 +62,20 @@ export default function PlayerProfileClient({ player, team }) {
       <PlayerLivePanel playerName={resolvedPlayer.name} season="2025" />
 
       <section className="professional-grid">
+        <NewsPanel query={resolvedPlayer.name} title={`Noticias de ${resolvedPlayer.name}`} />
+
+        <article className="glass-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">Mercado manual</p>
+              <h2>Leitura complementar</h2>
+            </div>
+          </div>
+          <p>{resolvedPlayer.newsPulse || "Use o modo admin para registrar leitura manual de noticias, valor de mercado e mercado do atleta."}</p>
+        </article>
+      </section>
+
+      <section className="professional-grid">
         <article className="glass-panel">
           <div className="section-heading">
             <div>
@@ -77,6 +92,7 @@ export default function PlayerProfileClient({ player, team }) {
             <span>{resolvedPlayer.height}</span>
             <span>{resolvedPlayer.club}</span>
             <span>{resolvedPlayer.marketMoment}</span>
+            <span>{resolvedPlayer.marketValue || "--"}</span>
             <span>{team?.system || "--"}</span>
           </div>
 

@@ -8,6 +8,8 @@ const FIELD_CONFIG = {
   teams: [
     { key: "name", label: "Nome do time" },
     { key: "league", label: "Liga" },
+    { key: "marketValue", label: "Valor de mercado" },
+    { key: "newsPulse", label: "Resumo de noticias", multiline: true },
     { key: "coach", label: "Comissao tecnica" },
     { key: "system", label: "Sistema base" },
     { key: "phase", label: "Momento competitivo" },
@@ -20,6 +22,8 @@ const FIELD_CONFIG = {
   players: [
     { key: "name", label: "Nome do atleta" },
     { key: "club", label: "Clube" },
+    { key: "marketValue", label: "Valor de mercado" },
+    { key: "newsPulse", label: "Resumo de noticias", multiline: true },
     { key: "role", label: "Funcao" },
     { key: "age", label: "Idade" },
     { key: "foot", label: "Pe dominante" },

@@ -1,17 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { API_FOOTBALL_LEAGUES } from "@/lib/api-football";
 
-const LEAGUE_OPTIONS = [
-  { id: "eng.1", label: "Premier League" },
-  { id: "esp.1", label: "La Liga" },
-  { id: "ita.1", label: "Serie A" },
-  { id: "ger.1", label: "Bundesliga" },
-  { id: "fra.1", label: "Ligue 1" },
-  { id: "bra.1", label: "Brasileirao" }
-];
-
-const SEASON_OPTIONS = ["2025", "2024", "2023", "2022"];
+const SEASON_OPTIONS = ["2026", "2025", "2024", "2023"];
 
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined || value === "") {
@@ -139,7 +131,7 @@ export default function StandingsFullDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [leagueId, setLeagueId] = useState("eng.1");
-  const [season, setSeason] = useState("2024");
+  const [season, setSeason] = useState("2025");
   const [teamAId, setTeamAId] = useState("");
   const [teamBId, setTeamBId] = useState("");
   const [trendTeamId, setTrendTeamId] = useState("");
@@ -174,6 +166,13 @@ export default function StandingsFullDashboard() {
   const leaders = payload?.leaders;
   const charts = payload?.charts;
   const source = payload?.source || "fallback";
+  const selectedLeague = API_FOOTBALL_LEAGUES.find((item) => item.appId === leagueId);
+
+  useEffect(() => {
+    if (selectedLeague?.season) {
+      setSeason(selectedLeague.season);
+    }
+  }, [selectedLeague?.season]);
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -247,8 +246,8 @@ export default function StandingsFullDashboard() {
           <label>
             Liga
             <select value={leagueId} onChange={(event) => setLeagueId(event.target.value)}>
-              {LEAGUE_OPTIONS.map((item) => (
-                <option key={item.id} value={item.id}>
+              {API_FOOTBALL_LEAGUES.map((item) => (
+                <option key={item.appId} value={item.appId}>
                   {item.label}
                 </option>
               ))}

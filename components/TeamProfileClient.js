@@ -5,6 +5,7 @@ import { useState } from "react";
 import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
+import NewsPanel from "@/components/NewsPanel";
 import TeamLivePanel from "@/components/TeamLivePanel";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 import { inferAppLeagueId } from "@/lib/api-football";
@@ -66,6 +67,20 @@ export default function TeamProfileClient({ team }) {
       />
 
       <section className="professional-grid">
+        <NewsPanel query={resolvedTeam.name} title={`Noticias de ${resolvedTeam.name}`} />
+
+        <article className="glass-panel">
+          <div className="section-heading">
+            <div>
+              <p className="panel-tag">Mercado manual</p>
+              <h2>Leitura complementar</h2>
+            </div>
+          </div>
+          <p>{resolvedTeam.newsPulse || "Use o modo admin para registrar leitura manual de noticias, valor de mercado e contexto do clube."}</p>
+        </article>
+      </section>
+
+      <section className="professional-grid">
         <article className="glass-panel">
           <div className="section-heading">
             <div>
@@ -86,6 +101,10 @@ export default function TeamProfileClient({ team }) {
             <div>
               <span className="detail-label">Foco de mercado</span>
               <strong>{resolvedTeam.marketFocus}</strong>
+            </div>
+            <div>
+              <span className="detail-label">Valor de mercado</span>
+              <strong>{resolvedTeam.marketValue || "--"}</strong>
             </div>
           </div>
 
