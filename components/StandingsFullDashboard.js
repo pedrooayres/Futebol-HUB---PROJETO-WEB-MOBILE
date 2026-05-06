@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { API_FOOTBALL_LEAGUES } from "@/lib/api-football";
+import { API_FOOTBALL_LEAGUES, buildCompetitionSourceMeta } from "@/lib/api-football";
 
 const SEASON_OPTIONS = ["2026", "2025", "2024", "2023"];
 
@@ -167,6 +167,7 @@ export default function StandingsFullDashboard() {
   const charts = payload?.charts;
   const source = payload?.source || "fallback";
   const selectedLeague = API_FOOTBALL_LEAGUES.find((item) => item.appId === leagueId);
+  const selectedSourceMeta = buildCompetitionSourceMeta(selectedLeague);
 
   useEffect(() => {
     if (selectedLeague?.season) {
@@ -265,6 +266,33 @@ export default function StandingsFullDashboard() {
             </select>
           </label>
         </div>
+
+        {selectedSourceMeta ? (
+          <div className="note-list">
+            <article className="note-card">
+              <div className="note-header">
+                <div>
+                  <h3>Fonte mapeada</h3>
+                  <p>
+                    {selectedSourceMeta.providerHint === "api-futebol-widget"
+                      ? "Widget/API-Futebol"
+                      : selectedSourceMeta.providerHint === "thesportsdb"
+                        ? "TheSportsDB"
+                        : selectedSourceMeta.providerHint === "livescore-api"
+                          ? "LiveScore API"
+                          : selectedSourceMeta.providerHint === "livescore-api-commentary"
+                            ? "LiveScore API Commentary"
+                            : "API-Football"}
+                  </p>
+                </div>
+                <span className="status-pill">{selectedLeague?.season}</span>
+              </div>
+              {selectedSourceMeta.externalUrl ? (
+                <p className="note-meta">Referencia externa mapeada para esta competicao.</p>
+              ) : null}
+            </article>
+          </div>
+        ) : null}
       </section>
 
       {loading ? <p>Carregando leitura completa da liga...</p> : null}
