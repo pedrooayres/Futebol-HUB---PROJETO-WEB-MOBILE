@@ -59,6 +59,22 @@ function ChartPanel({ title, subtitle, items, colorClass = "" }) {
   );
 }
 
+function getSourceLabel(source) {
+  if (source === "livescore-table") {
+    return "LiveScore";
+  }
+
+  if (source === "api-football") {
+    return "API-Football";
+  }
+
+  if (source === "api") {
+    return "Standings API";
+  }
+
+  return "Fallback";
+}
+
 function CompareStat({ label, left, right, suffix = "" }) {
   const leftValue = Number(left) || 0;
   const rightValue = Number(right) || 0;
@@ -228,7 +244,7 @@ export default function StandingsFullDashboard() {
             <span>Media de gols marcados</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{source === "api-football" ? "API-Football" : source === "api" ? "Standings API" : "Fallback"}</strong>
+            <strong>{getSourceLabel(source)}</strong>
             <span>Fonte ativa</span>
           </article>
         </div>
@@ -289,6 +305,12 @@ export default function StandingsFullDashboard() {
               </div>
               {selectedSourceMeta.externalUrl ? (
                 <p className="note-meta">Referencia externa mapeada para esta competicao.</p>
+              ) : null}
+              {selectedSourceMeta.supportsHistoricalStandings ? (
+                <p className="note-meta">
+                  Para competicoes com LiveScore, o sistema tenta traduzir o ano escolhido para o
+                  `season_id` real da API.
+                </p>
               ) : null}
             </article>
           </div>

@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { getApiFootballStandings, hasApiFootballKey } from "@/lib/api-football";
+import {
+  getApiFootballLeagueConfig,
+  getApiFootballStandings,
+  hasApiFootballKey,
+  hasLiveScoreConfig
+} from "@/lib/api-football";
 import { fallbackStandingsByLeague } from "@/lib/football-data";
 
 const DEFAULT_LEAGUE = "eng.1";
@@ -8,6 +13,21 @@ const STANDINGS_HOSTS = [
   "https://api-football-standings.azharimm.dev",
   "https://api-football-standings.azharimm.site"
 ];
+const LIVESCORE_BASE_URL = "https://livescore-api.com/api-client";
+
+function buildLiveScoreUrl(pathname, searchParams = {}) {
+  const url = new URL(`${LIVESCORE_BASE_URL}${pathname}`);
+  url.searchParams.set("key", process.env.LIVESCORE_API_KEY || "");
+  url.searchParams.set("secret", process.env.LIVESCORE_API_SECRET || "");
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  return url;
+}
 
 function buildStandingsUrl(host, league, season) {
   return `${host}/leagues/${league}/standings?season=${season}&sort=asc`;
@@ -42,6 +62,224 @@ function getPerformance(points, gamesPlayed) {
   }
 
   return Number(((points / (gamesPlayed * 3)) * 100).toFixed(1));
+}
+
+async function liveScoreRequest(pathname, searchParams = {}, revalidate = 1800) {
+  if (!hasLiveScoreConfig()) {
+    throw new Error("LIVESCORE_API_KEY/LIVESCORE_API_SECRET nao configuradas.");
+  }
+
+  const response = await fetch(buildLiveScoreUrl(pathname, searchParams), {
+    next: { revalidate }
+  });
+  const data = await response.json();
+
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.error || data?.message || "Falha ao consultar a LiveScore API.");
+  }
+
+  return data;
+}
+
+function buildLiveScoreSeasonCandidates(season) {
+  const numeric = Number(season);
+  if (!Number.isFinite(numeric)) {
+    return [];
+  }
+
+  return [`${numeric}/${numeric + 1}`, String(numeric), `${numeric - 1}/${numeric}`];
+}
+
+function inferSeasonDisplayFromName(name = "", fallbackSeason = DEFAULT_SEASON) {
+  if (!name) {
+    return `${fallbackSeason}/${Number(fallbackSeason) + 1}`;
+  }
+
+  return name;
+}
+
+async function resolveLiveScoreSeasonId(season) {
+  const data = await liveScoreRequest("/seasons/list.json", {}, 86400);
+  const seasons = data?.data?.seasons || [];
+  const candidates = buildLiveScoreSeasonCandidates(season);
+
+  const matchedSeason =
+    candidates
+      .map((candidateName) =>
+        seasons.find((item) => String(item.name).trim() === candidateName)
+      )
+      .find(Boolean) || null;
+
+  return matchedSeason
+    ? {
+        id: matchedSeason.id,
+        name: matchedSeason.name,
+        start: matchedSeason.start || "",
+        end: matchedSeason.end || ""
+      }
+    : null;
+}
+
+function flattenLiveScoreStandings(data) {
+  const stages = data?.data?.stages || [];
+
+  return stages.flatMap((stage) =>
+    (stage?.groups || []).flatMap((group) =>
+      (group?.standings || []).map((item) => ({
+        ...item,
+        stageName: stage?.stage?.name || "",
+        groupName: group?.name || ""
+      }))
+    )
+  );
+}
+
+function normalizeLiveScoreForm(form) {
+  if (Array.isArray(form)) {
+    return form.join(" ");
+  }
+
+  if (typeof form === "string") {
+    return form;
+  }
+
+  return "--";
+}
+
+async function getLiveScoreStandings(leagueId, season) {
+  const competition = getApiFootballLeagueConfig(leagueId);
+
+  if (!competition?.competitionId) {
+    throw new Error("Competicao sem competition_id configurado para LiveScore.");
+  }
+
+  const resolvedSeason = await resolveLiveScoreSeasonId(season);
+  const searchParams = {
+    competition_id: competition.competitionId,
+    include_form: 1
+  };
+
+  if (resolvedSeason?.id) {
+    searchParams.season_id = resolvedSeason.id;
+  }
+
+  const data = await liveScoreRequest("/competitions/table.json", searchParams, 1800);
+  const standings = flattenLiveScoreStandings(data);
+
+  if (standings.length === 0) {
+    throw new Error("A LiveScore nao retornou tabela para essa temporada.");
+  }
+
+  const rows = standings.map((item, index) => {
+    const points = normalizeNumber(item.points) || 0;
+    const gamesPlayed = normalizeNumber(item.matches) || 0;
+    const wins = normalizeNumber(item.won) || 0;
+    const draws = normalizeNumber(item.drawn) || 0;
+    const losses = normalizeNumber(item.lost) || 0;
+    const goalsFor = normalizeNumber(item.goals_scored) || 0;
+    const goalsAgainst = normalizeNumber(item.goals_conceded) || 0;
+    const goalDifference = normalizeNumber(item.goal_diff) || goalsFor - goalsAgainst;
+    const rank = normalizeNumber(item.rank) || index + 1;
+    const form = normalizeLiveScoreForm(item.form);
+
+    return {
+      id: String(item.team?.id || `${competition.competitionId}-${rank}`),
+      rank,
+      name: item.team?.name || "Clube",
+      shortName: item.team?.name?.slice(0, 3)?.toUpperCase() || "",
+      logo: item.team?.logo || "",
+      note: item.stageName && item.groupName ? `${item.stageName} | Grupo ${item.groupName}` : item.stageName || "",
+      points,
+      gamesPlayed,
+      wins,
+      draws,
+      losses,
+      goalsFor,
+      goalsAgainst,
+      goalDifference,
+      performance: getPerformance(points, gamesPlayed),
+      form,
+      stats: [],
+      group: item.groupName || "",
+      stage: item.stageName || "",
+      statMap: {
+        rank: String(rank),
+        gamesPlayed: String(gamesPlayed),
+        wins: String(wins),
+        draws: String(draws),
+        losses: String(losses),
+        points: String(points),
+        goalsFor: String(goalsFor),
+        goalsAgainst: String(goalsAgainst),
+        goalDifference: String(goalDifference),
+        form
+      }
+    };
+  });
+
+  const leaderBy = (selector, sort = "desc") =>
+    [...rows]
+      .filter((item) => typeof selector(item) === "number")
+      .sort((a, b) => {
+        const result = selector(a) - selector(b);
+        return sort === "asc" ? result : -result;
+      })[0] || null;
+
+  const leaders = {
+    tableLeader: leaderBy((item) => item.points),
+    bestAttack: leaderBy((item) => item.goalsFor),
+    bestDefense: leaderBy((item) => item.goalsAgainst, "asc"),
+    mostWins: leaderBy((item) => item.wins)
+  };
+
+  const charts = {
+    points: rows.slice(0, 8).map((item) => ({ id: item.id, label: item.shortName || item.name, value: item.points })),
+    attack: [...rows]
+      .sort((a, b) => b.goalsFor - a.goalsFor)
+      .slice(0, 8)
+      .map((item) => ({ id: item.id, label: item.shortName || item.name, value: item.goalsFor })),
+    defense: [...rows]
+      .sort((a, b) => a.goalsAgainst - b.goalsAgainst)
+      .slice(0, 8)
+      .map((item) => ({ id: item.id, label: item.shortName || item.name, value: item.goalsAgainst }))
+  };
+
+  const summary = {
+    teams: rows.length,
+    averagePoints:
+      rows.length > 0
+        ? Number((rows.reduce((sum, item) => sum + item.points, 0) / rows.length).toFixed(1))
+        : 0,
+    averageGoalsFor:
+      rows.length > 0
+        ? Number((rows.reduce((sum, item) => sum + item.goalsFor, 0) / rows.length).toFixed(1))
+        : 0,
+    maximumPoints: leaders.tableLeader?.points || 0
+  };
+
+  return {
+    requestMeta: {
+      leagueId,
+      providerLeagueId: competition.competitionId,
+      season: Number(season),
+      providerSeasonId: resolvedSeason?.id || null
+    },
+    league: {
+      name: data?.data?.competition?.name || competition.label,
+      abbreviation: competition.label,
+      seasonDisplay: inferSeasonDisplayFromName(resolvedSeason?.name, season),
+      season: Number(season),
+      country: competition.country
+    },
+    summary,
+    leaders,
+    charts,
+    rows,
+    source: "livescore-table",
+    message: resolvedSeason?.id
+      ? `Tabela carregada pela LiveScore com season_id ${resolvedSeason.id}.`
+      : "Tabela carregada pela LiveScore na temporada atual da competicao."
+  };
 }
 
 function buildFallbackPayload(leagueId, season) {
@@ -136,6 +374,23 @@ export async function GET(request) {
   const season = searchParams.get("season") || DEFAULT_SEASON;
 
   try {
+    const liveScoreConfig = getApiFootballLeagueConfig(leagueId);
+
+    if (liveScoreConfig?.providerHint === "livescore-api" && liveScoreConfig?.competitionId && hasLiveScoreConfig()) {
+      try {
+        const liveScorePayload = await getLiveScoreStandings(leagueId, season);
+        return NextResponse.json(liveScorePayload);
+      } catch (liveScoreError) {
+        if (hasApiFootballKey()) {
+          const apiFootballPayload = await getApiFootballStandings(leagueId, season);
+          return NextResponse.json({
+            ...apiFootballPayload,
+            message: `LiveScore indisponivel para ${leagueId}/${season}. Fallback em API-Football: ${liveScoreError.message}`
+          });
+        }
+      }
+    }
+
     if (hasApiFootballKey()) {
       const payload = await getApiFootballStandings(leagueId, season);
       return NextResponse.json(payload);
