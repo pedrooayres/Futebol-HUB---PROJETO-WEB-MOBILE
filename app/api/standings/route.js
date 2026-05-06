@@ -146,6 +146,141 @@ function normalizeLiveScoreForm(form) {
   return "--";
 }
 
+function getKnockoutRoundLabel(value = "") {
+  const normalized = String(value || "").trim();
+
+  if (!normalized || normalized === "999") {
+    return "Fase em definicao";
+  }
+
+  return normalized;
+}
+
+function normalizeLiveScoreMatch(item, mode = "history") {
+  const home = item.home || {};
+  const away = item.away || {};
+  const scoreObject = item.scores || {};
+  const score =
+    scoreObject.score ||
+    scoreObject.ft_score ||
+    [scoreObject.home_score, scoreObject.away_score].filter((value) => value !== undefined).join(" - ") ||
+    "--";
+
+  return {
+    id: String(item.id || item.fixture_id || `${home.id || "h"}-${away.id || "a"}-${item.date || item.scheduled || mode}`),
+    round: getKnockoutRoundLabel(item.round),
+    date: item.date || "",
+    time: item.time || item.scheduled || "",
+    status: item.status || item.time || (mode === "fixtures" ? "AGENDADO" : "FT"),
+    homeTeam: {
+      id: String(home.id || ""),
+      name: home.name || "Mandante",
+      logo: home.logo || ""
+    },
+    awayTeam: {
+      id: String(away.id || ""),
+      name: away.name || "Visitante",
+      logo: away.logo || ""
+    },
+    score,
+    location: item.location || "",
+    winner: item.outcomes?.full_time || "",
+    fixtureId: String(item.fixture_id || ""),
+    mode
+  };
+}
+
+function buildRoundOrderValue(round) {
+  const normalized = String(round || "").toUpperCase();
+  const knockoutOrder = {
+    "PRELIMINARY": 0,
+    "QUAL": 1,
+    "R128": 2,
+    "R64": 3,
+    "R32": 4,
+    "R16": 5,
+    "QF": 6,
+    "SF": 7,
+    "3P": 8,
+    "FINAL": 9
+  };
+
+  if (normalized in knockoutOrder) {
+    return knockoutOrder[normalized];
+  }
+
+  const numeric = Number(normalized);
+  if (Number.isFinite(numeric)) {
+    return 100 + numeric;
+  }
+
+  return 999;
+}
+
+function groupMatchesByRound(matches) {
+  const buckets = new Map();
+
+  matches.forEach((match) => {
+    const key = match.round || "Fase em definicao";
+    const current = buckets.get(key) || [];
+    current.push(match);
+    buckets.set(key, current);
+  });
+
+  return [...buckets.entries()]
+    .sort((a, b) => buildRoundOrderValue(a[0]) - buildRoundOrderValue(b[0]))
+    .map(([round, items]) => ({
+      round,
+      matches: items
+    }));
+}
+
+async function getLiveScoreKnockoutPayload(leagueId, season) {
+  const competition = getApiFootballLeagueConfig(leagueId);
+  const resolvedSeason = await resolveLiveScoreSeasonId(season);
+  const competition_id = competition.competitionId;
+
+  const [liveData, fixturesData, historyData] = await Promise.all([
+    liveScoreRequest("/matches/live.json", { competition_id }, 120).catch(() => ({ data: { match: [] } })),
+    liveScoreRequest("/fixtures/list.json", { competition_id }, 1800).catch(() => ({ data: { fixtures: [] } })),
+    liveScoreRequest("/matches/history.json", { competition_id }, 1800).catch(() => ({ data: { match: [] } }))
+  ]);
+
+  const liveMatches = (liveData?.data?.match || []).map((item) => normalizeLiveScoreMatch(item, "live"));
+  const upcomingMatches = (fixturesData?.data?.fixtures || []).map((item) => normalizeLiveScoreMatch(item, "fixtures"));
+  const recentMatches = (historyData?.data?.match || []).map((item) => normalizeLiveScoreMatch(item, "history"));
+  const rounds = groupMatchesByRound([...upcomingMatches, ...recentMatches]);
+
+  return {
+    mode: "knockout",
+    requestMeta: {
+      leagueId,
+      providerLeagueId: competition_id,
+      season: Number(season),
+      providerSeasonId: resolvedSeason?.id || null
+    },
+    league: {
+      name: competition.label,
+      abbreviation: competition.label,
+      seasonDisplay: inferSeasonDisplayFromName(resolvedSeason?.name, season),
+      season: Number(season),
+      country: competition.country
+    },
+    overview: {
+      liveMatches: liveMatches.length,
+      upcomingMatches: upcomingMatches.length,
+      recentMatches: recentMatches.length,
+      rounds: rounds.length
+    },
+    liveMatches,
+    upcomingMatches: upcomingMatches.slice(0, 16),
+    recentMatches: recentMatches.slice(0, 16),
+    rounds,
+    source: "livescore-knockout",
+    message: "Modo mata-mata ativo com base em livescores, agenda e historico da competicao."
+  };
+}
+
 async function getLiveScoreStandings(leagueId, season) {
   const competition = getApiFootballLeagueConfig(leagueId);
 
@@ -378,6 +513,11 @@ export async function GET(request) {
 
     if (liveScoreConfig?.providerHint === "livescore-api" && liveScoreConfig?.competitionId && hasLiveScoreConfig()) {
       try {
+        if (liveScoreConfig.type === "Cup") {
+          const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
+          return NextResponse.json(liveScoreKnockoutPayload);
+        }
+
         const liveScorePayload = await getLiveScoreStandings(leagueId, season);
         return NextResponse.json(liveScorePayload);
       } catch (liveScoreError) {

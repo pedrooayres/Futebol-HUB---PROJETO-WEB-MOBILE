@@ -60,6 +60,10 @@ function ChartPanel({ title, subtitle, items, colorClass = "" }) {
 }
 
 function getSourceLabel(source) {
+  if (source === "livescore-knockout") {
+    return "LiveScore KO";
+  }
+
   if (source === "livescore-table") {
     return "LiveScore";
   }
@@ -142,6 +146,25 @@ function getTrend(team) {
   return trends.slice(0, 3);
 }
 
+function KnockoutMatchCard({ match }) {
+  return (
+    <article className="knockout-match-card">
+      <div className="knockout-match-top">
+        <span className="badge">{match.round}</span>
+        <span className="status-pill">{match.status || "--"}</span>
+      </div>
+      <div className="knockout-teams">
+        <strong>{match.homeTeam.name}</strong>
+        <span>{match.score}</span>
+        <strong>{match.awayTeam.name}</strong>
+      </div>
+      <p className="note-meta">
+        {[match.date, match.time, match.location].filter(Boolean).join(" | ") || "Agenda em atualizacao"}
+      </p>
+    </article>
+  );
+}
+
 export default function StandingsFullDashboard() {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -182,6 +205,12 @@ export default function StandingsFullDashboard() {
   const leaders = payload?.leaders;
   const charts = payload?.charts;
   const source = payload?.source || "fallback";
+  const mode = payload?.mode || "table";
+  const overview = payload?.overview;
+  const liveMatches = payload?.liveMatches || [];
+  const upcomingMatches = payload?.upcomingMatches || [];
+  const recentMatches = payload?.recentMatches || [];
+  const rounds = payload?.rounds || [];
   const selectedLeague = API_FOOTBALL_LEAGUES.find((item) => item.appId === leagueId);
   const selectedSourceMeta = buildCompetitionSourceMeta(selectedLeague);
 
@@ -232,16 +261,16 @@ export default function StandingsFullDashboard() {
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{summary?.teams ?? 0}</strong>
-            <span>Clubes</span>
+            <strong>{mode === "knockout" ? overview?.liveMatches ?? 0 : summary?.teams ?? 0}</strong>
+            <span>{mode === "knockout" ? "Ao vivo" : "Clubes"}</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{summary?.maximumPoints ?? 0}</strong>
-            <span>Maior pontuacao</span>
+            <strong>{mode === "knockout" ? overview?.upcomingMatches ?? 0 : summary?.maximumPoints ?? 0}</strong>
+            <span>{mode === "knockout" ? "Proximos jogos" : "Maior pontuacao"}</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{summary?.averageGoalsFor ?? 0}</strong>
-            <span>Media de gols marcados</span>
+            <strong>{mode === "knockout" ? overview?.rounds ?? 0 : summary?.averageGoalsFor ?? 0}</strong>
+            <span>{mode === "knockout" ? "Fases mapeadas" : "Media de gols marcados"}</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{getSourceLabel(source)}</strong>
@@ -323,6 +352,86 @@ export default function StandingsFullDashboard() {
 
       {!loading && !error ? (
         <>
+          {mode === "knockout" ? (
+            <>
+              <section className="professional-grid">
+                <article className="glass-panel">
+                  <div className="section-heading">
+                    <div>
+                      <p className="panel-tag">Mata-mata</p>
+                      <h2>Jogos ao vivo</h2>
+                    </div>
+                    <span className="badge">{liveMatches.length} partidas</span>
+                  </div>
+
+                  <div className="knockout-grid">
+                    {(liveMatches.length ? liveMatches : [{ id: "no-live", round: "Sem jogos ao vivo", status: "--", homeTeam: { name: "Nenhum jogo" }, awayTeam: { name: "neste momento" }, score: "--", date: "", time: "", location: "" }]).map((match) => (
+                      <KnockoutMatchCard key={match.id} match={match} />
+                    ))}
+                  </div>
+                </article>
+
+                <article className="glass-panel">
+                  <div className="section-heading">
+                    <div>
+                      <p className="panel-tag">Agenda</p>
+                      <h2>Proximos confrontos</h2>
+                    </div>
+                    <span className="badge">{upcomingMatches.length}</span>
+                  </div>
+
+                  <div className="knockout-grid">
+                    {upcomingMatches.slice(0, 8).map((match) => (
+                      <KnockoutMatchCard key={match.id} match={match} />
+                    ))}
+                  </div>
+                </article>
+              </section>
+
+              <section className="professional-grid">
+                <article className="glass-panel">
+                  <div className="section-heading">
+                    <div>
+                      <p className="panel-tag">Historico</p>
+                      <h2>Ultimos jogos</h2>
+                    </div>
+                    <span className="badge">{recentMatches.length}</span>
+                  </div>
+
+                  <div className="knockout-grid">
+                    {recentMatches.slice(0, 8).map((match) => (
+                      <KnockoutMatchCard key={match.id} match={match} />
+                    ))}
+                  </div>
+                </article>
+
+                <article className="glass-panel">
+                  <div className="section-heading">
+                    <div>
+                      <p className="panel-tag">Chaveamento</p>
+                      <h2>Fases da competicao</h2>
+                    </div>
+                    <span className="badge">{rounds.length}</span>
+                  </div>
+
+                  <div className="note-list">
+                    {rounds.map((round) => (
+                      <article key={round.round} className="note-card">
+                        <div className="note-header">
+                          <div>
+                            <h3>{round.round}</h3>
+                            <p>{round.matches.length} confrontos mapeados</p>
+                          </div>
+                          <span className="status-pill">{round.matches[0]?.mode === "fixtures" ? "Agenda" : "Historico"}</span>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </article>
+              </section>
+            </>
+          ) : (
+            <>
           <section className="triple-grid">
             <LeaderCard
               label="Lider da tabela"
@@ -565,6 +674,8 @@ export default function StandingsFullDashboard() {
               </table>
             </div>
           </article>
+            </>
+          )}
         </>
       ) : null}
     </section>
