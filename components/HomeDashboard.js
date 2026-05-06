@@ -44,6 +44,7 @@ export default function HomeDashboard() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [backStatus, setBackStatus] = useState("");
+  const [footballStatus, setFootballStatus] = useState(null);
 
   useEffect(() => {
     async function loadItems() {
@@ -61,6 +62,20 @@ export default function HomeDashboard() {
     }
 
     loadItems();
+  }, []);
+
+  useEffect(() => {
+    async function loadFootballStatus() {
+      try {
+        const response = await fetch("/api/football/status");
+        const data = await response.json();
+        setFootballStatus(data);
+      } catch (_error) {
+        setFootballStatus(null);
+      }
+    }
+
+    loadFootballStatus();
   }, []);
 
   const kpis = useMemo(() => {
@@ -200,7 +215,11 @@ export default function HomeDashboard() {
             </p>
           ) : null}
 
-          <p className="warning">Base pronta para migracao progressiva com API-Football em ranking, times e jogadores.</p>
+          <p className="warning">
+            {footballStatus?.configured
+              ? "API-Football conectada para enriquecer ranking e perfis com dados externos."
+              : "API-Football pronta para conexao. Configure API_FOOTBALL_KEY na Vercel para ativar a camada live."}
+          </p>
         </article>
       </section>
 

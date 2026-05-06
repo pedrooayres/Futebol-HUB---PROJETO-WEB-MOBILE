@@ -5,7 +5,9 @@ import { useState } from "react";
 import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
+import TeamLivePanel from "@/components/TeamLivePanel";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
+import { inferAppLeagueId } from "@/lib/api-football";
 
 export default function TeamProfileClient({ team }) {
   const { isAdmin } = useAccess();
@@ -56,6 +58,12 @@ export default function TeamProfileClient({ team }) {
           <p>Ajuste os dados exibidos neste perfil sem sair da pagina do clube.</p>
         </section>
       ) : null}
+
+      <TeamLivePanel
+        teamName={resolvedTeam.name}
+        leagueId={inferAppLeagueId(resolvedTeam.league)}
+        season="2025"
+      />
 
       <section className="professional-grid">
         <article className="glass-panel">

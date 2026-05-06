@@ -5,6 +5,7 @@ import { useState } from "react";
 import AdminEntityEditor from "@/components/AdminEntityEditor";
 import { useAccess } from "@/components/AccessProvider";
 import { AdvancedOnly, CommonOnly } from "@/components/AccessVisibility";
+import PlayerLivePanel from "@/components/PlayerLivePanel";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
 
 export default function PlayerProfileClient({ player, team }) {
@@ -56,6 +57,8 @@ export default function PlayerProfileClient({ player, team }) {
           <p>Ajuste o cadastro tecnico do atleta sem sair do perfil individual.</p>
         </section>
       ) : null}
+
+      <PlayerLivePanel playerName={resolvedPlayer.name} season="2025" />
 
       <section className="professional-grid">
         <article className="glass-panel">
