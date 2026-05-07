@@ -445,7 +445,15 @@ async function getLiveScoreStandings(leagueId, season) {
 }
 
 function buildFallbackPayload(leagueId, season) {
-  const leagueData = fallbackStandingsByLeague[leagueId] || fallbackStandingsByLeague[DEFAULT_LEAGUE];
+  const leagueData = fallbackStandingsByLeague[leagueId];
+
+  if (!leagueData) {
+    return buildUnavailablePayload(
+      leagueId,
+      season,
+      "Sem fallback local confiavel para essa competicao/temporada."
+    );
+  }
 
   const rows = leagueData.teams.map((team, index) => {
     const [name, shortName, points, gamesPlayed, wins, draws, losses, goalsFor, goalsAgainst] = team;
@@ -530,6 +538,31 @@ function buildFallbackPayload(leagueId, season) {
   };
 }
 
+function buildUnavailablePayload(leagueId, season, message) {
+  const competition = getApiFootballLeagueConfig(leagueId);
+
+  return {
+    mode: "unavailable",
+    requestMeta: {
+      leagueId,
+      season: Number(season)
+    },
+    league: {
+      name: competition?.label || "Competicao",
+      abbreviation: competition?.label || "",
+      seasonDisplay: `${season}/${Number(season) + 1}`,
+      season: Number(season),
+      country: competition?.country || ""
+    },
+    summary: null,
+    leaders: null,
+    charts: null,
+    rows: [],
+    source: "unavailable",
+    message
+  };
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const leagueId = searchParams.get("league") || DEFAULT_LEAGUE;
@@ -558,7 +591,13 @@ export async function GET(request) {
             });
           }
 
-          throw standingsError;
+          return NextResponse.json(
+            buildUnavailablePayload(
+              leagueId,
+              season,
+              `Sem tabela historica confiavel para ${leagueId}/${season}: ${standingsError.message}`
+            )
+          );
         }
       } catch (liveScoreError) {
         if (hasApiFootballKey()) {
@@ -598,9 +637,13 @@ export async function GET(request) {
     }
 
     if (!data) {
+      const fallbackPayload = buildFallbackPayload(leagueId, season);
       return NextResponse.json({
-        ...buildFallbackPayload(leagueId, season),
-        message: lastError?.message || "Dados externos indisponiveis. Fallback local em uso."
+        ...fallbackPayload,
+        message:
+          fallbackPayload.mode === "unavailable"
+            ? lastError?.message || fallbackPayload.message
+            : lastError?.message || "Dados externos indisponiveis. Fallback local em uso."
       });
     }
     const standings = data?.data?.standings || [];
@@ -724,9 +767,10 @@ export async function GET(request) {
       source: "api"
     });
   } catch (error) {
+    const fallbackPayload = buildFallbackPayload(leagueId, season);
     return NextResponse.json({
-      ...buildFallbackPayload(leagueId, season),
-      message: error.message
+      ...fallbackPayload,
+      message: fallbackPayload.mode === "unavailable" ? error.message : error.message
     });
   }
 }

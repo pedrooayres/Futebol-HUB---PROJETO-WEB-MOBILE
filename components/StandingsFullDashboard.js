@@ -5,6 +5,20 @@ import { API_FOOTBALL_LEAGUES, buildCompetitionSourceMeta } from "@/lib/api-foot
 
 const SEASON_OPTIONS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018"];
 
+const MODERN_LEAGUE_PHASE_COMPETITIONS = new Set(["ucl", "uel", "uecl"]);
+
+function shouldDefaultToKnockoutView(league, providerHint, season) {
+  if (!league || league.type !== "Cup" || providerHint !== "livescore-api") {
+    return false;
+  }
+
+  if (MODERN_LEAGUE_PHASE_COMPETITIONS.has(league.appId) && Number(season) >= 2024) {
+    return false;
+  }
+
+  return true;
+}
+
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined || value === "") {
     return "--";
@@ -226,12 +240,16 @@ export default function StandingsFullDashboard() {
 
   useEffect(() => {
     if (selectedLeague?.type === "Cup" && selectedSourceMeta?.providerHint === "livescore-api") {
-      setView("standings");
+      setView(
+        shouldDefaultToKnockoutView(selectedLeague, selectedSourceMeta.providerHint, season)
+          ? "knockout"
+          : "standings"
+      );
       return;
     }
 
     setView("auto");
-  }, [leagueId, selectedLeague?.type, selectedSourceMeta?.providerHint]);
+  }, [leagueId, season, selectedLeague, selectedSourceMeta?.providerHint]);
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -328,8 +346,10 @@ export default function StandingsFullDashboard() {
             <label>
               Visao
               <select value={view} onChange={(event) => setView(event.target.value)}>
-                <option value="standings">Fase de liga / grupos</option>
-                <option value="knockout">Mata-mata</option>
+                {availableViews.includes("standings") ? (
+                  <option value="standings">Fase de liga / grupos</option>
+                ) : null}
+                {availableViews.includes("knockout") ? <option value="knockout">Mata-mata</option> : null}
               </select>
             </label>
           ) : null}
@@ -367,7 +387,7 @@ export default function StandingsFullDashboard() {
               {phaseLabel ? <p className="note-meta">Formato detectado: {phaseLabel}.</p> : null}
               {selectedLeague?.type === "Cup" && selectedSourceMeta?.providerHint === "livescore-api" ? (
                 <p className="note-meta">
-                  Voce pode alternar entre a fase classificatoria e o mata-mata nas copas com cobertura da LiveScore.
+                  Edicoes recentes com fase classificatoria abrem em tabela. Copas e edicoes antigas priorizam o mata-mata.
                 </p>
               ) : null}
             </article>
@@ -381,7 +401,23 @@ export default function StandingsFullDashboard() {
 
       {!loading && !error ? (
         <>
-          {activeView === "knockout" || mode === "knockout" ? (
+          {mode === "unavailable" ? (
+            <article className="glass-panel phase-highlight">
+              <div className="section-heading">
+                <div>
+                  <p className="panel-tag">Cobertura historica</p>
+                  <h2>Sem tabela confiavel para esta temporada</h2>
+                </div>
+                <span className="badge">{league?.seasonDisplay || season}</span>
+              </div>
+              <p className="note-meta">
+                Esta competicao nao tem uma classificacao historica consistente nas fontes conectadas para o recorte
+                selecionado. Tente outra temporada ou escolha uma copa/torneio com leitura de mata-mata.
+              </p>
+            </article>
+          ) : null}
+
+          {mode !== "unavailable" && (activeView === "knockout" || mode === "knockout") ? (
             <>
               <section className="professional-grid">
                 <article className="glass-panel">
@@ -459,7 +495,9 @@ export default function StandingsFullDashboard() {
                 </article>
               </section>
             </>
-          ) : (
+          ) : null}
+
+          {mode !== "unavailable" && activeView !== "knockout" && mode !== "knockout" ? (
             <>
           {phaseLabel ? (
             <article className="glass-panel phase-highlight">
@@ -722,7 +760,7 @@ export default function StandingsFullDashboard() {
             </div>
           </article>
             </>
-          )}
+          ) : null}
         </>
       ) : null}
     </section>
