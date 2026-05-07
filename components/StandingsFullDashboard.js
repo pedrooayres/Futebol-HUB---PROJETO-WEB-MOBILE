@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { API_FOOTBALL_LEAGUES, buildCompetitionSourceMeta } from "@/lib/api-football";
 
-const SEASON_OPTIONS = ["2026", "2025", "2024", "2023"];
+const SEASON_OPTIONS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018"];
 
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined || value === "") {
@@ -174,6 +174,7 @@ export default function StandingsFullDashboard() {
   const [teamAId, setTeamAId] = useState("");
   const [teamBId, setTeamBId] = useState("");
   const [trendTeamId, setTrendTeamId] = useState("");
+  const [view, setView] = useState("auto");
 
   useEffect(() => {
     async function loadData() {
@@ -181,7 +182,7 @@ export default function StandingsFullDashboard() {
       setError("");
 
       try {
-        const response = await fetch(`/api/standings?league=${leagueId}&season=${season}`);
+        const response = await fetch(`/api/standings?league=${leagueId}&season=${season}&view=${view}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -197,7 +198,7 @@ export default function StandingsFullDashboard() {
     }
 
     loadData();
-  }, [leagueId, season]);
+  }, [leagueId, season, view]);
 
   const rows = payload?.rows || [];
   const league = payload?.league;
@@ -211,6 +212,9 @@ export default function StandingsFullDashboard() {
   const upcomingMatches = payload?.upcomingMatches || [];
   const recentMatches = payload?.recentMatches || [];
   const rounds = payload?.rounds || [];
+  const activeView = payload?.activeView || "standings";
+  const availableViews = payload?.availableViews || ["standings"];
+  const phaseLabel = payload?.phaseLabel || "";
   const selectedLeague = API_FOOTBALL_LEAGUES.find((item) => item.appId === leagueId);
   const selectedSourceMeta = buildCompetitionSourceMeta(selectedLeague);
 
@@ -219,6 +223,15 @@ export default function StandingsFullDashboard() {
       setSeason(selectedLeague.season);
     }
   }, [selectedLeague?.season]);
+
+  useEffect(() => {
+    if (selectedLeague?.type === "Cup" && selectedSourceMeta?.providerHint === "livescore-api") {
+      setView("standings");
+      return;
+    }
+
+    setView("auto");
+  }, [leagueId, selectedLeague?.type, selectedSourceMeta?.providerHint]);
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -310,6 +323,16 @@ export default function StandingsFullDashboard() {
               ))}
             </select>
           </label>
+
+          {selectedLeague?.type === "Cup" && selectedSourceMeta?.providerHint === "livescore-api" ? (
+            <label>
+              Visao
+              <select value={view} onChange={(event) => setView(event.target.value)}>
+                <option value="standings">Fase de liga / grupos</option>
+                <option value="knockout">Mata-mata</option>
+              </select>
+            </label>
+          ) : null}
         </div>
 
         {selectedSourceMeta ? (
@@ -341,6 +364,12 @@ export default function StandingsFullDashboard() {
                   `season_id` real da API.
                 </p>
               ) : null}
+              {phaseLabel ? <p className="note-meta">Formato detectado: {phaseLabel}.</p> : null}
+              {selectedLeague?.type === "Cup" && selectedSourceMeta?.providerHint === "livescore-api" ? (
+                <p className="note-meta">
+                  Voce pode alternar entre a fase classificatoria e o mata-mata nas copas com cobertura da LiveScore.
+                </p>
+              ) : null}
             </article>
           </div>
         ) : null}
@@ -352,7 +381,7 @@ export default function StandingsFullDashboard() {
 
       {!loading && !error ? (
         <>
-          {mode === "knockout" ? (
+          {activeView === "knockout" || mode === "knockout" ? (
             <>
               <section className="professional-grid">
                 <article className="glass-panel">
@@ -432,6 +461,24 @@ export default function StandingsFullDashboard() {
             </>
           ) : (
             <>
+          {phaseLabel ? (
+            <article className="glass-panel phase-highlight">
+              <div className="section-heading">
+                <div>
+                  <p className="panel-tag">Formato da edicao</p>
+                  <h2>{phaseLabel}</h2>
+                </div>
+                <span className="badge">{league?.seasonDisplay || season}</span>
+              </div>
+              <p className="note-meta">
+                {phaseLabel === "Fase de liga"
+                  ? "Edicoes recentes usam a fase unica classificatoria antes do mata-mata."
+                  : phaseLabel === "Fase de grupos"
+                    ? "Edicoes antigas ou torneios de selecoes seguem a distribuicao por grupos antes do mata-mata."
+                    : "Leitura classificatoria ativa para esta competicao."}
+              </p>
+            </article>
+          ) : null}
           <section className="triple-grid">
             <LeaderCard
               label="Lider da tabela"

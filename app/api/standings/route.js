@@ -134,6 +134,26 @@ function flattenLiveScoreStandings(data) {
   );
 }
 
+function inferCupPhaseLabel(leagueId, season, rows, stages = []) {
+  const numericSeason = Number(season);
+  const groupNames = [...new Set(rows.map((item) => item.group).filter(Boolean))];
+  const stageNames = [...new Set(stages.map((item) => item.stage?.name).filter(Boolean))];
+
+  if (["ucl", "uel", "uecl"].includes(leagueId)) {
+    return numericSeason >= 2024 ? "Fase de liga" : "Fase de grupos";
+  }
+
+  if (["world-cup", "euro", "copa-america"].includes(leagueId)) {
+    return "Fase de grupos";
+  }
+
+  if (groupNames.length > 1 || stageNames.some((name) => /group/i.test(name))) {
+    return "Fase de grupos";
+  }
+
+  return "Tabela principal";
+}
+
 function normalizeLiveScoreForm(form) {
   if (Array.isArray(form)) {
     return form.join(" ");
@@ -253,6 +273,8 @@ async function getLiveScoreKnockoutPayload(leagueId, season) {
 
   return {
     mode: "knockout",
+    activeView: "knockout",
+    availableViews: ["standings", "knockout"],
     requestMeta: {
       leagueId,
       providerLeagueId: competition_id,
@@ -299,6 +321,7 @@ async function getLiveScoreStandings(leagueId, season) {
   }
 
   const data = await liveScoreRequest("/competitions/table.json", searchParams, 1800);
+  const stages = data?.data?.stages || [];
   const standings = flattenLiveScoreStandings(data);
 
   if (standings.length === 0) {
@@ -393,6 +416,10 @@ async function getLiveScoreStandings(leagueId, season) {
   };
 
   return {
+    mode: "standings",
+    activeView: "standings",
+    availableViews: competition.type === "Cup" ? ["standings", "knockout"] : ["standings"],
+    phaseLabel: competition.type === "Cup" ? inferCupPhaseLabel(leagueId, season, rows, stages) : "",
     requestMeta: {
       leagueId,
       providerLeagueId: competition.competitionId,
@@ -507,19 +534,32 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const leagueId = searchParams.get("league") || DEFAULT_LEAGUE;
   const season = searchParams.get("season") || DEFAULT_SEASON;
+  const view = searchParams.get("view") || "auto";
 
   try {
     const liveScoreConfig = getApiFootballLeagueConfig(leagueId);
 
     if (liveScoreConfig?.providerHint === "livescore-api" && liveScoreConfig?.competitionId && hasLiveScoreConfig()) {
       try {
-        if (liveScoreConfig.type === "Cup") {
+        if (liveScoreConfig.type === "Cup" && view === "knockout") {
           const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
           return NextResponse.json(liveScoreKnockoutPayload);
         }
 
-        const liveScorePayload = await getLiveScoreStandings(leagueId, season);
-        return NextResponse.json(liveScorePayload);
+        try {
+          const liveScorePayload = await getLiveScoreStandings(leagueId, season);
+          return NextResponse.json(liveScorePayload);
+        } catch (standingsError) {
+          if (liveScoreConfig.type === "Cup") {
+            const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
+            return NextResponse.json({
+              ...liveScoreKnockoutPayload,
+              message: `Fase classificatoria indisponivel para ${leagueId}/${season}. Exibindo mata-mata: ${standingsError.message}`
+            });
+          }
+
+          throw standingsError;
+        }
       } catch (liveScoreError) {
         if (hasApiFootballKey()) {
           const apiFootballPayload = await getApiFootballStandings(leagueId, season);
