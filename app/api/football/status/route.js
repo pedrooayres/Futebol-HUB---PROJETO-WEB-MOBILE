@@ -7,6 +7,7 @@ import {
   hasApiFootballKey,
   hasLiveScoreConfig
 } from "@/lib/api-football";
+import { publicErrorMessage } from "@/lib/api-errors";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -35,8 +36,8 @@ export async function GET(request) {
     return NextResponse.json({
       ...payload,
       message: hasLiveScoreConfig()
-        ? "LiveScore ativo para competicoes mapeadas. Configure API_FOOTBALL_KEY para ampliar a cobertura."
-        : "Configure LIVESCORE_API_KEY/LIVESCORE_API_SECRET e API_FOOTBALL_KEY para ativar as fontes reais."
+        ? "LiveScore ativo para competições mapeadas. API-Football pode ampliar a cobertura quando configurada."
+        : "Fontes ao vivo ainda não configuradas. O produto segue operando com dados locais e fallback."
     });
   }
 
@@ -50,7 +51,7 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json({
       ...payload,
-      message: error.message
+      message: publicErrorMessage(error, "Não foi possível validar a cobertura da API-Football agora.")
     });
   }
 }

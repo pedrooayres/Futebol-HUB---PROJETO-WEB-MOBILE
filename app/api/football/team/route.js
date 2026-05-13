@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getApiFootballTeamSnapshot, hasApiFootballKey } from "@/lib/api-football";
+import { publicErrorMessage } from "@/lib/api-errors";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +12,7 @@ export async function GET(request) {
   if (!name.trim()) {
     return NextResponse.json(
       {
-        message: "Informe o nome do time para consultar a API-Football."
+        message: "Informe o nome do time para consultar dados ao vivo."
       },
       { status: 400 }
     );
@@ -21,7 +22,7 @@ export async function GET(request) {
     return NextResponse.json({
       configured: false,
       source: "fallback",
-      message: "API_FOOTBALL_KEY nao configurada. Painel live indisponivel no momento."
+      message: "Painel ao vivo indisponível no momento."
     });
   }
 
@@ -36,7 +37,7 @@ export async function GET(request) {
     return NextResponse.json({
       configured: true,
       source: "api-football",
-      message: error.message
+      message: publicErrorMessage(error, "Não foi possível carregar dados ao vivo do time agora.")
     });
   }
 }

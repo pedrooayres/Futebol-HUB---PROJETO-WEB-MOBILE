@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getGNewsArticles, hasGNewsKey } from "@/lib/news-provider";
+import { publicErrorMessage } from "@/lib/api-errors";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -12,7 +13,7 @@ export async function GET(request) {
   if (!query.trim()) {
     return NextResponse.json(
       {
-        message: "Informe um termo de busca para carregar noticias."
+        message: "Informe um termo de busca para carregar notícias."
       },
       { status: 400 }
     );
@@ -22,7 +23,7 @@ export async function GET(request) {
     return NextResponse.json({
       configured: false,
       source: "fallback",
-      message: "GNEWS_API_KEY nao configurada. Noticias externas indisponiveis no momento.",
+      message: "Radar de notícias externo indisponível no momento.",
       articles: []
     });
   }
@@ -41,7 +42,7 @@ export async function GET(request) {
       configured: true,
       source: "gnews",
       query,
-      message: error.message,
+      message: publicErrorMessage(error, "Não foi possível carregar notícias agora."),
       articles: []
     });
   }

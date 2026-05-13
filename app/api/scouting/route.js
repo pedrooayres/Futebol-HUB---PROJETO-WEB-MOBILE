@@ -1,24 +1,7 @@
 import { NextResponse } from "next/server";
 import { back4appRequest, getClassName, hasBack4AppConfig } from "@/lib/back4app";
-import { parseListField } from "@/lib/report-utils";
-
-function buildBody(payload) {
-  return {
-    playerName: payload.playerName,
-    club: payload.club,
-    position: payload.position,
-    rating: Number(payload.rating),
-    status: payload.status,
-    priority: payload.priority || "Media",
-    reportSummary: payload.reportSummary || "",
-    strengths: parseListField(payload.strengths),
-    risks: parseListField(payload.risks),
-    recommendation: payload.recommendation || "",
-    nextAction: payload.nextAction || "",
-    isFavorite: Boolean(payload.isFavorite),
-    notes: payload.notes
-  };
-}
+import { jsonError, publicErrorMessage } from "@/lib/api-errors";
+import { buildScoutingBody } from "@/lib/scouting-validation";
 
 export async function GET() {
   if (!hasBack4AppConfig()) {
@@ -26,7 +9,7 @@ export async function GET() {
       {
         items: [],
         configured: false,
-        message: `Defina as credenciais do Back4App para usar a classe ${getClassName()}.`
+        message: `Base de scouting offline. Configure a classe ${getClassName()} para salvar registros reais.`
       },
       { status: 200 }
     );
@@ -44,7 +27,7 @@ export async function GET() {
       {
         items: [],
         configured: true,
-        message: error.message
+        message: publicErrorMessage(error, "Não foi possível carregar a base de scouting.")
       },
       { status: 500 }
     );
@@ -54,7 +37,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const payload = await request.json();
-    const body = buildBody(payload);
+    const body = buildScoutingBody(payload);
 
     const created = await back4appRequest("", {
       method: "POST",
@@ -63,6 +46,6 @@ export async function POST(request) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return jsonError(error, "Não foi possível salvar o relatório de scouting.");
   }
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { hasLiveScoreConfig } from "@/lib/api-football";
+import { publicErrorMessage } from "@/lib/api-errors";
+import { fetchJson } from "@/lib/http-client";
 
 const LIVE_SCORE_BASE_URL = "https://livescore-api.com/api-client/matches/live.json";
 
@@ -9,13 +11,13 @@ export async function GET(request) {
   const competitionId = searchParams.get("competitionId");
 
   if (!competitionId) {
-    return NextResponse.json({ message: "competitionId obrigatorio." }, { status: 400 });
+    return NextResponse.json({ message: "competitionId obrigatório." }, { status: 400 });
   }
 
   if (!hasLiveScoreConfig()) {
     return NextResponse.json({
       configured: false,
-      message: "LIVESCORE_API_KEY e LIVESCORE_API_SECRET nao configuradas."
+      message: "Fonte LiveScore indisponível no momento."
     });
   }
 
@@ -25,10 +27,9 @@ export async function GET(request) {
   url.searchParams.set("secret", process.env.LIVESCORE_API_SECRET);
 
   try {
-    const response = await fetch(url, {
+    const { data } = await fetchJson(url, {
       next: { revalidate: 600 }
-    });
-    const data = await response.json();
+    }, { timeoutMs: 8000 });
 
     return NextResponse.json({
       configured: true,
@@ -41,7 +42,7 @@ export async function GET(request) {
       configured: true,
       competitionId,
       source: "livescore-api",
-      message: error.message
+      message: publicErrorMessage(error, "Não foi possível carregar o placar ao vivo agora.")
     });
   }
 }

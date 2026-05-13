@@ -5,7 +5,9 @@ import {
   hasApiFootballKey,
   hasLiveScoreConfig
 } from "@/lib/api-football";
+import { publicErrorMessage } from "@/lib/api-errors";
 import { fallbackStandingsByLeague } from "@/lib/football-data";
+import { fetchJson } from "@/lib/http-client";
 
 const DEFAULT_LEAGUE = "eng.1";
 const DEFAULT_SEASON = "2025";
@@ -66,13 +68,12 @@ function getPerformance(points, gamesPlayed) {
 
 async function liveScoreRequest(pathname, searchParams = {}, revalidate = 1800) {
   if (!hasLiveScoreConfig()) {
-    throw new Error("LIVESCORE_API_KEY/LIVESCORE_API_SECRET nao configuradas.");
+    throw new Error("Camada LiveScore ainda não configurada.");
   }
 
-  const response = await fetch(buildLiveScoreUrl(pathname, searchParams), {
+  const { response, data } = await fetchJson(buildLiveScoreUrl(pathname, searchParams), {
     next: { revalidate }
-  });
-  const data = await response.json();
+  }, { timeoutMs: 10000 });
 
   if (!response.ok || data?.success === false) {
     throw new Error(data?.error || data?.message || "Falha ao consultar a LiveScore API.");
@@ -299,7 +300,7 @@ async function getLiveScoreKnockoutPayload(leagueId, season) {
     recentMatches: recentMatches.slice(0, 16),
     rounds,
     source: "livescore-knockout",
-    message: "Modo mata-mata ativo com base em livescores, agenda e historico da competicao."
+    message: "Modo mata-mata ativo com base em livescores, agenda e histórico da competição."
   };
 }
 
@@ -325,7 +326,7 @@ async function getLiveScoreStandings(leagueId, season) {
   const standings = flattenLiveScoreStandings(data);
 
   if (standings.length === 0) {
-    throw new Error("A LiveScore nao retornou tabela para essa temporada.");
+    throw new Error("A LiveScore não retornou tabela para essa temporada.");
   }
 
   const rows = standings.map((item, index) => {
@@ -440,7 +441,7 @@ async function getLiveScoreStandings(leagueId, season) {
     source: "livescore-table",
     message: resolvedSeason?.id
       ? `Tabela carregada pela LiveScore com season_id ${resolvedSeason.id}.`
-      : "Tabela carregada pela LiveScore na temporada atual da competicao."
+      : "Tabela carregada pela LiveScore na temporada atual da competição."
   };
 }
 
@@ -451,7 +452,7 @@ function buildFallbackPayload(leagueId, season) {
     return buildUnavailablePayload(
       leagueId,
       season,
-      "Sem fallback local confiavel para essa competicao/temporada."
+      "Sem fallback local confiável para essa competição/temporada."
     );
   }
 
@@ -587,7 +588,7 @@ export async function GET(request) {
             const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
             return NextResponse.json({
               ...liveScoreKnockoutPayload,
-              message: `Fase classificatoria indisponivel para ${leagueId}/${season}. Exibindo mata-mata: ${standingsError.message}`
+              message: `Fase classificatória indisponível. Exibindo mata-mata: ${publicErrorMessage(standingsError)}`
             });
           }
 
@@ -595,7 +596,7 @@ export async function GET(request) {
             buildUnavailablePayload(
               leagueId,
               season,
-              `Sem tabela historica confiavel para ${leagueId}/${season}: ${standingsError.message}`
+              `Sem tabela histórica confiável para esta competição: ${publicErrorMessage(standingsError)}`
             )
           );
         }
@@ -604,7 +605,7 @@ export async function GET(request) {
           const apiFootballPayload = await getApiFootballStandings(leagueId, season);
           return NextResponse.json({
             ...apiFootballPayload,
-            message: `LiveScore indisponivel para ${leagueId}/${season}. Fallback em API-Football: ${liveScoreError.message}`
+            message: `LiveScore indisponível. Fallback em API-Football: ${publicErrorMessage(liveScoreError)}`
           });
         }
       }
@@ -621,15 +622,16 @@ export async function GET(request) {
 
     for (const host of STANDINGS_HOSTS) {
       try {
-        response = await fetch(buildStandingsUrl(host, leagueId, season), {
+        const result = await fetchJson(buildStandingsUrl(host, leagueId, season), {
           next: { revalidate: 3600 }
-        });
+        }, { timeoutMs: 8000 });
+        response = result.response;
 
         if (!response.ok) {
-          throw new Error("Nao foi possivel carregar a tabela externa.");
+          throw new Error("Não foi possível carregar a tabela externa.");
         }
 
-        data = await response.json();
+        data = result.data;
         break;
       } catch (error) {
         lastError = error;
@@ -642,8 +644,8 @@ export async function GET(request) {
         ...fallbackPayload,
         message:
           fallbackPayload.mode === "unavailable"
-            ? lastError?.message || fallbackPayload.message
-            : lastError?.message || "Dados externos indisponiveis. Fallback local em uso."
+            ? publicErrorMessage(lastError, fallbackPayload.message) || fallbackPayload.message
+            : publicErrorMessage(lastError, "Dados externos indisponíveis. Fallback local em uso.")
       });
     }
     const standings = data?.data?.standings || [];
@@ -770,7 +772,7 @@ export async function GET(request) {
     const fallbackPayload = buildFallbackPayload(leagueId, season);
     return NextResponse.json({
       ...fallbackPayload,
-      message: fallbackPayload.mode === "unavailable" ? error.message : error.message
+      message: publicErrorMessage(error, fallbackPayload.message)
     });
   }
 }

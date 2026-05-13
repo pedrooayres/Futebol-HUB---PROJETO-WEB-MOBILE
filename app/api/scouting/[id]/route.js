@@ -1,29 +1,12 @@
 import { NextResponse } from "next/server";
 import { back4appRequest } from "@/lib/back4app";
-import { parseListField } from "@/lib/report-utils";
-
-function buildBody(payload) {
-  return {
-    playerName: payload.playerName,
-    club: payload.club,
-    position: payload.position,
-    rating: Number(payload.rating),
-    status: payload.status,
-    priority: payload.priority || "Media",
-    reportSummary: payload.reportSummary || "",
-    strengths: parseListField(payload.strengths),
-    risks: parseListField(payload.risks),
-    recommendation: payload.recommendation || "",
-    nextAction: payload.nextAction || "",
-    isFavorite: Boolean(payload.isFavorite),
-    notes: payload.notes
-  };
-}
+import { jsonError } from "@/lib/api-errors";
+import { buildScoutingBody } from "@/lib/scouting-validation";
 
 export async function PUT(request, { params }) {
   try {
     const payload = await request.json();
-    const body = buildBody(payload);
+    const body = buildScoutingBody(payload);
 
     const updated = await back4appRequest(`/${params.id}`, {
       method: "PUT",
@@ -32,7 +15,7 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return jsonError(error, "Não foi possível atualizar o relatório de scouting.");
   }
 }
 
@@ -44,6 +27,6 @@ export async function DELETE(_request, { params }) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return jsonError(error, "Não foi possível excluir o relatório de scouting.");
   }
 }
