@@ -21,7 +21,7 @@ export default function AccessSelector() {
     return (
       <div className="access-control-row">
         <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
-          Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
+          Modo: {role === "common" ? "Usuário padrão" : role === "professional" ? "Profissional" : "Admin"}
         </button>
         <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
           Sair
@@ -35,7 +35,7 @@ export default function AccessSelector() {
       {role ? (
         <div className="access-control-row">
           <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
-            Modo: {role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin"}
+            Modo: {role === "common" ? "Usuário padrão" : role === "professional" ? "Profissional" : "Admin"}
           </button>
           <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
             Sair
@@ -47,28 +47,28 @@ export default function AccessSelector() {
         <div className="access-overlay">
           <div className="glass-panel access-modal">
             <p className="panel-tag">Perfil de acesso</p>
-            <h2>Como voce quer usar o Futebol HUB?</h2>
+            <h2>Como você quer usar o Futebol HUB?</h2>
             <p>
-              Escolha a experiencia mais adequada. O modo profissional mostra analise aprofundada,
-              enquanto o padrao entrega leitura mais direta.
+              Escolha a experiência mais adequada. O modo profissional mostra análise aprofundada,
+              enquanto o padrão entrega leitura mais direta.
             </p>
 
             <div className="card-grid">
               <button type="button" className="access-card" onClick={() => chooseRole("common")}>
-                <strong>Usuario padrao</strong>
+                <strong>Usuário padrão</strong>
                 <span>Resultados, resumo de jogos, leitura simples de time e atleta.</span>
               </button>
 
               <button type="button" className="access-card" onClick={() => chooseRole("professional")}>
                 <strong>Profissional</strong>
-                <span>Dados tecnicos, analise mais profunda, contexto de mercado e performance.</span>
+                <span>Dados técnicos, análise mais profunda, contexto de mercado e performance.</span>
               </button>
             </div>
 
             <div className="admin-unlock-box">
               <div>
                 <span className="detail-label">Admin</span>
-                <p>Use o codigo de administrador para editar dados, atualizar relatorios e operar o modulo manual.</p>
+                <p>Use o código de administrador para editar dados, atualizar relatórios e operar o módulo manual.</p>
               </div>
 
               <div className="admin-unlock-form">
@@ -76,7 +76,7 @@ export default function AccessSelector() {
                   type="password"
                   value={adminCode}
                   onChange={(event) => setAdminCode(event.target.value)}
-                  placeholder="Codigo admin"
+                  placeholder="Código admin"
                 />
                 <button type="button" className="primary-button" onClick={() => unlockAdmin(adminCode)} disabled={adminLoading}>
                   {adminLoading ? "Validando..." : "Entrar como admin"}

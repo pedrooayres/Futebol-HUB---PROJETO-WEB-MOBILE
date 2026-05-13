@@ -4,11 +4,11 @@ import { useAccess } from "@/components/AccessProvider";
 
 export default function QuickModeSummary({
   commonTitle = "Leitura direta",
-  commonText = "Visao resumida para acompanhar rapidamente desempenho, contexto e destaques.",
+  commonText = "Visão resumida para acompanhar rapidamente desempenho, contexto e destaques.",
   professionalTitle = "Leitura aprofundada",
-  professionalText = "Contexto tecnico mais completo para profissionais de scouting e analise.",
+  professionalText = "Contexto técnico mais completo para profissionais de scouting e análise.",
   adminTitle = "Controle total",
-  adminText = "Acesso manual a edicao, atualizacao e operacao dos dados do produto."
+  adminText = "Acesso manual a edição, atualização e operação dos dados do produto."
 }) {
   const { isCommon, isProfessional, isAdmin } = useAccess();
 
@@ -23,7 +23,7 @@ export default function QuickModeSummary({
       <p className="panel-tag">Modo atual</p>
       <h2>{payload.title}</h2>
       <p>{payload.text}</p>
-      {isCommon ? <span className="badge">Padrao</span> : null}
+      {isCommon ? <span className="badge">Padrão</span> : null}
       {isProfessional ? <span className="badge accent">Profissional</span> : null}
       {isAdmin ? <span className="badge accent">Admin</span> : null}
     </article>

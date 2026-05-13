@@ -10,27 +10,27 @@ import StandingsPreview from "@/components/StandingsPreview";
 
 const coreModules = [
   {
-    label: "Operacao",
+    label: "Operação",
     title: "Central de scouting",
-    text: "Registre atletas, acompanhe status e mantenha observacoes organizadas em um fluxo unico."
+    text: "Registre atletas, acompanhe status e mantenha observações organizadas em um fluxo único."
   },
   {
     label: "Contexto",
     title: "Dados competitivos",
-    text: "Use ranking e desempenho externo para contextualizar leitura tecnica e momento dos clubes."
+    text: "Use ranking e desempenho externo para contextualizar leitura técnica e momento dos clubes."
   },
   {
-    label: "Decisao",
+    label: "Decisão",
     title: "Acompanhamento objetivo",
-    text: "Transforme notas, filtros e historico em uma base mais clara para avaliacao de talentos."
+    text: "Transforme notas, filtros e histórico em uma base mais clara para avaliação de talentos."
   }
 ];
 
 const workflowSteps = [
-  "Registrar observacoes de atletas",
-  "Classificar por status e nota tecnica",
-  "Cruzar analise interna com dados externos",
-  "Priorizar acompanhamento e proximas acoes"
+  "Registrar observações de atletas",
+  "Classificar por status e nota técnica",
+  "Cruzar análise interna com dados externos",
+  "Priorizar acompanhamento e próximas ações"
 ];
 
 const useCases = [
@@ -89,7 +89,7 @@ export default function HomeDashboard() {
     return [
       { label: "Jogadores monitorados", value: String(items.length).padStart(2, "0") },
       { label: "Aprovados", value: String(approved).padStart(2, "0") },
-      { label: "Media tecnica", value: average }
+      { label: "Média técnica", value: average }
     ];
   }, [items]);
 
@@ -100,9 +100,9 @@ export default function HomeDashboard() {
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">Futebol HUB Pro</span>
-          <h1>Scouting e inteligencia esportiva em um unico painel.</h1>
+          <h1>Scouting e inteligência esportiva em um único painel.</h1>
           <p>
-            Uma plataforma para registrar observacoes, acompanhar atletas e apoiar decisoes com
+            Uma plataforma para registrar observações, acompanhar atletas e apoiar decisões com
             dados organizados e contexto competitivo.
           </p>
 
@@ -114,10 +114,23 @@ export default function HomeDashboard() {
               Consultar ranking
             </Link>
           </div>
+
+          <div className="hero-focus-row" aria-label="Resumo operacional">
+            <span>Scouting</span>
+            <span>Ranking</span>
+            <span>Perfis</span>
+          </div>
         </div>
 
         <aside className="hero-card">
-          <p className="card-label">Visao geral</p>
+          <div className="pitch-visual" aria-hidden="true">
+            <span className="pitch-line pitch-line-mid" />
+            <span className="pitch-circle" />
+            <span className="pitch-dot pitch-dot-one" />
+            <span className="pitch-dot pitch-dot-two" />
+            <span className="pitch-dot pitch-dot-three" />
+          </div>
+          <p className="card-label">Visão geral</p>
           <div className="metric-stack">
             {kpis.map((item) => (
               <div key={item.label} className="metric-card">
@@ -142,10 +155,10 @@ export default function HomeDashboard() {
 
       <section className="professional-grid">
         <QuickModeSummary
-          commonTitle="Usuario padrao"
-          commonText="Acompanhe resultados, contexto rapido e perfis resumidos sem excesso de camada tecnica."
+          commonTitle="Usuário padrão"
+          commonText="Acompanhe resultados, contexto rápido e perfis resumidos sem excesso de camada técnica."
           professionalTitle="Profissional"
-          professionalText="Leia scouting, relatorios externos, forma recente e contexto competitivo com maior profundidade."
+          professionalText="Leia scouting, relatórios externos, forma recente e contexto competitivo com maior profundidade."
           adminTitle="Admin"
           adminText="Gerencie o produto, atualize dados manualmente e opere a base com controle total."
         />
@@ -162,7 +175,7 @@ export default function HomeDashboard() {
             <div className="workflow-list">
               <div className="workflow-row">
                 <span className="standing-index">1</span>
-                <p>Veja como um time vem jogando nos ultimos jogos.</p>
+                <p>Veja como um time vem jogando nos últimos jogos.</p>
               </div>
               <div className="workflow-row">
                 <span className="standing-index">2</span>
@@ -182,7 +195,7 @@ export default function HomeDashboard() {
           <div className="section-heading">
             <div>
               <p className="panel-tag">Fluxo de uso</p>
-              <h2>Como a plataforma apoia a analise</h2>
+              <h2>Como a plataforma apoia a análise</h2>
             </div>
           </div>
 
@@ -199,7 +212,7 @@ export default function HomeDashboard() {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Aplicacao</p>
+              <p className="panel-tag">Aplicação</p>
               <h2>Perfis de uso</h2>
             </div>
           </div>
@@ -212,14 +225,14 @@ export default function HomeDashboard() {
 
           {hasAdvancedAccess || isAdmin ? (
             <p className="warning">
-              Este modo libera leitura aprofundada de perfis, relatorios mais densos e ambiente de scouting mais detalhado.
+              Este modo libera leitura aprofundada de perfis, relatórios mais densos e ambiente de scouting mais detalhado.
             </p>
           ) : null}
 
           <p className="warning">
             {footballStatus?.configured
               ? "API-Football conectada para enriquecer ranking e perfis com dados externos."
-              : "API-Football pronta para conexao. Configure API_FOOTBALL_KEY na Vercel para ativar a camada live."}
+              : "Dados ao vivo temporariamente indisponíveis. O painel segue funcionando com a base local."}
           </p>
         </article>
       </section>
@@ -231,7 +244,7 @@ export default function HomeDashboard() {
           <div className="section-heading">
             <div>
               <p className="panel-tag">Base recente</p>
-              <h2>Observacoes cadastradas</h2>
+              <h2>Observações cadastradas</h2>
             </div>
             <span className="badge">{recentItems.length} itens</span>
           </div>
@@ -252,7 +265,7 @@ export default function HomeDashboard() {
                     {item.status}
                   </span>
                 </div>
-                <p className="note-meta">Nota tecnica: {item.rating}</p>
+                <p className="note-meta">Nota técnica: {item.rating}</p>
               </article>
             ))}
 
@@ -262,13 +275,13 @@ export default function HomeDashboard() {
           </div>
 
           <Link href="/scouting" className="inline-link">
-            Abrir modulo completo
+            Abrir módulo completo
           </Link>
         </article>
       </section>
 
       <section className="professional-grid">
-        <NewsPanel query="futebol OR football transfers OR champions league OR brasileirao" title="Radar de noticias do futebol" />
+        <NewsPanel query="futebol OR football transfers OR champions league OR brasileirao" title="Radar de notícias do futebol" />
 
         <article className="glass-panel">
           <div className="section-heading">
@@ -278,8 +291,8 @@ export default function HomeDashboard() {
             </div>
           </div>
           <ul className="feature-list">
-            <li>API-Football para competicoes, tabelas, jogos, times e jogadores.</li>
-            <li>GNews para noticias de clubes, ligas, atletas e mercado.</li>
+            <li>API-Football para competições, tabelas, jogos, times e jogadores.</li>
+            <li>GNews para notícias de clubes, ligas, atletas e mercado.</li>
             <li>Admin pode complementar manualmente valor de mercado e leitura editorial.</li>
           </ul>
         </article>

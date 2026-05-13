@@ -23,7 +23,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 28%),
@@ -97,6 +97,7 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  min-width: max-content;
 }
 
 .brand-mark strong,
@@ -121,7 +122,7 @@ img {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
   font-weight: 700;
   color: #04101b;
   background: linear-gradient(135deg, var(--accent), var(--secondary));
@@ -359,6 +360,7 @@ img {
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid transparent;
+  white-space: nowrap;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -385,7 +387,7 @@ img {
 .hero {
   grid-template-columns: 1.3fr 0.9fr;
   align-items: stretch;
-  padding: 36px 0 20px;
+  padding: 112px 0 20px;
 }
 
 .hero-portal {
@@ -396,7 +398,7 @@ img {
 .hero-card,
 .glass-panel {
   border: 1px solid var(--panel-border);
-  background: var(--panel);
+  background: rgba(8, 21, 38, 0.7);
   backdrop-filter: blur(14px);
   box-shadow: var(--shadow);
 }
@@ -406,6 +408,9 @@ img {
   padding: 48px;
   position: relative;
   overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(125, 249, 166, 0.1), rgba(8, 21, 38, 0.76) 42%),
+    rgba(8, 21, 38, 0.72);
 }
 
 .hero-copy::after {
@@ -422,8 +427,8 @@ img {
 .glass-panel h2,
 .glass-panel h3,
 .scout-card h3 {
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-  letter-spacing: -0.03em;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  letter-spacing: 0;
 }
 
 .hero h1 {
@@ -469,6 +474,21 @@ img {
 .card-actions {
   flex-wrap: wrap;
   margin-top: 28px;
+}
+
+.hero-focus-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.hero-focus-row span {
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #dce7f7;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .primary-button,
@@ -546,6 +566,86 @@ img {
     var(--panel);
 }
 
+.pitch-visual {
+  position: relative;
+  min-height: 170px;
+  margin-bottom: 24px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 249, 166, 0.22);
+  background:
+    linear-gradient(90deg, rgba(125, 249, 166, 0.08) 50%, rgba(56, 189, 248, 0.08) 50%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 54px),
+    rgba(7, 32, 28, 0.62);
+}
+
+.pitch-visual::before,
+.pitch-visual::after,
+.pitch-line,
+.pitch-circle,
+.pitch-dot {
+  position: absolute;
+  display: block;
+}
+
+.pitch-visual::before,
+.pitch-visual::after {
+  content: "";
+  top: 28px;
+  bottom: 28px;
+  width: 58px;
+  border: 1px solid rgba(244, 247, 251, 0.34);
+}
+
+.pitch-visual::before {
+  left: 0;
+  border-left: 0;
+}
+
+.pitch-visual::after {
+  right: 0;
+  border-right: 0;
+}
+
+.pitch-line-mid {
+  inset: 0 auto 0 50%;
+  width: 1px;
+  background: rgba(244, 247, 251, 0.28);
+}
+
+.pitch-circle {
+  width: 62px;
+  height: 62px;
+  left: calc(50% - 31px);
+  top: calc(50% - 31px);
+  border-radius: 50%;
+  border: 1px solid rgba(244, 247, 251, 0.32);
+}
+
+.pitch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 24px rgba(125, 249, 166, 0.5);
+}
+
+.pitch-dot-one {
+  left: 22%;
+  top: 36%;
+}
+
+.pitch-dot-two {
+  left: 54%;
+  top: 62%;
+  background: var(--secondary);
+}
+
+.pitch-dot-three {
+  right: 18%;
+  top: 30%;
+}
+
 .card-label {
   margin: 0 0 20px;
   color: var(--muted);
@@ -566,7 +666,7 @@ img {
 .metric-card strong {
   display: block;
   font-size: 2rem;
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
 }
 
 .metric-card span,
@@ -761,7 +861,7 @@ img {
   display: block;
   margin-top: 16px;
   font-size: 2rem;
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
 }
 
 .chart-list {
@@ -1141,8 +1241,8 @@ img {
 .section-banner h1 {
   margin: 12px 0;
   font-size: clamp(2.4rem, 5vw, 4rem);
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-  letter-spacing: -0.03em;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  letter-spacing: 0;
 }
 
 .section-banner p {
@@ -1191,7 +1291,7 @@ img {
 .mini-kpi-card strong,
 .info-card strong {
   display: block;
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
 }
 
 .mini-kpi-card strong {
@@ -1375,7 +1475,7 @@ img {
   display: block;
   font-size: 2rem;
   margin-top: 18px;
-  font-family: "Trebuchet MS", sans-serif;
+  font-family: "Segoe UI", Inter, Roboto, Arial, sans-serif;
 }
 
 .scout-card-kpis {
@@ -1514,6 +1614,27 @@ img {
     padding-top: 20px;
   }
 
+  .site-header {
+    position: sticky;
+  }
+
+  .site-header-inner {
+    align-items: flex-start;
+  }
+
+  .main-nav {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    justify-content: flex-start;
+    scrollbar-width: thin;
+  }
+
+  .hero {
+    padding-top: 18px;
+  }
+
   .hero-copy,
   .hero-card,
   .glass-panel,
@@ -1529,10 +1650,6 @@ img {
   .scout-card-top,
   .site-header-inner {
     flex-direction: column;
-  }
-
-  .main-nav {
-    justify-content: flex-start;
   }
 
   .nav-session-actions {

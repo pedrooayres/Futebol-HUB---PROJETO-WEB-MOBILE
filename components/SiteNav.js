@@ -11,7 +11,7 @@ const navItems = [
   { href: "/times", label: "Times" },
   { href: "/jogadores", label: "Jogadores" },
   { href: "/ranking", label: "Ranking" },
-  { href: "/relatorios", label: "Relatorios" },
+  { href: "/relatorios", label: "Relatórios" },
   { href: "/scouting", label: "Scouting" }
 ];
 
@@ -19,7 +19,7 @@ export default function SiteNav() {
   const pathname = usePathname();
   const { role, ready, logoutRole, reopenSelector } = useAccess();
   const modeLabel =
-    role === "common" ? "Usuario padrao" : role === "professional" ? "Profissional" : "Admin";
+    role === "common" ? "Usuário padrão" : role === "professional" ? "Profissional" : "Admin";
 
   return (
     <header className="site-header">
@@ -28,7 +28,7 @@ export default function SiteNav() {
           <span className="brand-ball">F</span>
           <div>
             <strong>Futebol HUB Pro</strong>
-            <span>Inteligencia esportiva e scouting</span>
+            <span>Inteligência esportiva e scouting</span>
           </div>
         </Link>
 
@@ -56,7 +56,7 @@ export default function SiteNav() {
               {modeLabel}
             </button>
             <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
-              Logout
+              Sair
             </button>
           </div>
         ) : null}
