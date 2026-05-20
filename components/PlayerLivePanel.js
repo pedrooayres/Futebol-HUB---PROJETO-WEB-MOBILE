@@ -50,6 +50,8 @@ export default function PlayerLivePanel({ playerName, season = "2025" }) {
   const stats = payload?.statistics;
   const transfers = payload?.transfers || [];
   const trophies = payload?.trophies || [];
+  const isConfigured = payload?.configured !== false;
+  const hasLiveData = Boolean(payload?.player || stats || transfers.length || trophies.length);
 
   return (
     <section className="professional-grid">
@@ -59,11 +61,28 @@ export default function PlayerLivePanel({ playerName, season = "2025" }) {
             <p className="panel-tag">API-Football</p>
             <h2>Snapshot live do atleta</h2>
           </div>
-          <span className="badge">{payload?.configured === false ? "Nao configurada" : "Live"}</span>
+          <span className="badge">{isConfigured ? "Live" : "Nao configurada"}</span>
         </div>
 
         {loading ? <p>Consultando dados atualizados do jogador...</p> : null}
         {!loading && error ? <p className="warning">{error}</p> : null}
+        {!loading && !hasLiveData ? (
+          <div className="note-list">
+            <article className="note-card">
+              <div className="note-header">
+                <div>
+                  <h3>{isConfigured ? "Sem snapshot encontrado" : "Fonte live pendente"}</h3>
+                  <p>
+                    {isConfigured
+                      ? "A busca live nao retornou estatisticas para este nome e temporada."
+                      : "Configure a chave API-Football na Vercel para liberar estatisticas, transferencias e titulos do atleta."}
+                  </p>
+                </div>
+                <span className="status-pill">{season}</span>
+              </div>
+            </article>
+          </div>
+        ) : null}
 
         {!loading && payload?.player ? (
           <div className="player-meta-grid">
@@ -144,6 +163,18 @@ export default function PlayerLivePanel({ playerName, season = "2025" }) {
         </div>
 
         {loading ? <p>Montando leitura de mercado...</p> : null}
+        {!loading && transfers.length === 0 && trophies.length === 0 ? (
+          <div className="note-list">
+            <article className="note-card">
+              <div className="note-header">
+                <div>
+                  <h3>Sem mercado live carregado</h3>
+                  <p>Quando a fonte estiver ativa, este bloco passa a mostrar transferencias recentes e titulos.</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        ) : null}
 
         {!loading && transfers.length > 0 ? (
           <>
