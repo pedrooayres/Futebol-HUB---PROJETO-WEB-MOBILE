@@ -1380,6 +1380,30 @@ img {
   outline: none;
 }
 
+.scout-form select,
+.scout-toolbar select {
+  min-height: 56px;
+  padding-right: 48px;
+  color: #f8fbff;
+  font-weight: 700;
+  border-color: rgba(125, 249, 166, 0.24);
+  background:
+    linear-gradient(180deg, rgba(17, 29, 53, 0.98), rgba(7, 14, 27, 0.99)),
+    #0f172a;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 30px rgba(2, 8, 23, 0.28);
+}
+
+.scout-form select option,
+.scout-toolbar select option {
+  color: #f8fbff;
+  background: #0f172a;
+  font-weight: 700;
+}
+
 .scout-form input:focus,
 .scout-form select:focus,
 .scout-form textarea:focus,
