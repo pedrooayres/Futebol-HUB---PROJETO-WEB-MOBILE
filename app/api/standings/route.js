@@ -82,10 +82,18 @@ async function liveScoreRequest(pathname, searchParams = {}, revalidate = 1800) 
   return data;
 }
 
-function buildLiveScoreSeasonCandidates(season) {
+function usesCalendarYearSeason(competition) {
+  return ["Brazil", "Argentina"].includes(competition?.country);
+}
+
+function buildLiveScoreSeasonCandidates(season, competition = null) {
   const numeric = Number(season);
   if (!Number.isFinite(numeric)) {
     return [];
+  }
+
+  if (usesCalendarYearSeason(competition)) {
+    return [String(numeric), `${numeric}/${numeric + 1}`, `${numeric - 1}/${numeric}`];
   }
 
   return [`${numeric}/${numeric + 1}`, String(numeric), `${numeric - 1}/${numeric}`];
@@ -99,10 +107,10 @@ function inferSeasonDisplayFromName(name = "", fallbackSeason = DEFAULT_SEASON) 
   return name;
 }
 
-async function resolveLiveScoreSeasonId(season) {
+async function resolveLiveScoreSeasonId(season, competition = null) {
   const data = await liveScoreRequest("/seasons/list.json", {}, 86400);
   const seasons = data?.data?.seasons || [];
-  const candidates = buildLiveScoreSeasonCandidates(season);
+  const candidates = buildLiveScoreSeasonCandidates(season, competition);
 
   const matchedSeason =
     candidates
@@ -256,9 +264,20 @@ function groupMatchesByRound(matches) {
     }));
 }
 
+function hasLiveScoreMatchCoverage(payload) {
+  const overview = payload?.overview || {};
+
+  return Boolean(
+    overview.liveMatches ||
+      overview.upcomingMatches ||
+      overview.recentMatches ||
+      overview.rounds
+  );
+}
+
 async function getLiveScoreKnockoutPayload(leagueId, season) {
   const competition = getApiFootballLeagueConfig(leagueId);
-  const resolvedSeason = await resolveLiveScoreSeasonId(season);
+  const resolvedSeason = await resolveLiveScoreSeasonId(season, competition);
   const competition_id = competition.competitionId;
 
   const [liveData, fixturesData, historyData] = await Promise.all([
@@ -300,7 +319,7 @@ async function getLiveScoreKnockoutPayload(leagueId, season) {
     recentMatches: recentMatches.slice(0, 16),
     rounds,
     source: "livescore-knockout",
-    message: "Modo mata-mata ativo com base em livescores, agenda e histórico da competição."
+    message: "Agenda e histórico ativos com base em livescores, próximos jogos e partidas recentes."
   };
 }
 
@@ -311,7 +330,7 @@ async function getLiveScoreStandings(leagueId, season) {
     throw new Error("Competicao sem competition_id configurado para LiveScore.");
   }
 
-  const resolvedSeason = await resolveLiveScoreSeasonId(season);
+  const resolvedSeason = await resolveLiveScoreSeasonId(season, competition);
   const searchParams = {
     competition_id: competition.competitionId,
     include_form: 1
@@ -584,11 +603,15 @@ export async function GET(request) {
           const liveScorePayload = await getLiveScoreStandings(leagueId, season);
           return NextResponse.json(liveScorePayload);
         } catch (standingsError) {
-          if (liveScoreConfig.type === "Cup") {
-            const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
+          const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season).catch(() => null);
+
+          if (liveScoreKnockoutPayload && (liveScoreConfig.type === "Cup" || hasLiveScoreMatchCoverage(liveScoreKnockoutPayload))) {
             return NextResponse.json({
               ...liveScoreKnockoutPayload,
-              message: `Fase classificatória indisponível. Exibindo mata-mata: ${publicErrorMessage(standingsError)}`
+              message:
+                liveScoreConfig.type === "Cup"
+                  ? "Tabela classificatória indisponível na LiveScore. Exibindo agenda, histórico e mata-mata quando disponível."
+                  : "Tabela classificatória indisponível na LiveScore. Exibindo agenda e histórico da competição."
             });
           }
 
