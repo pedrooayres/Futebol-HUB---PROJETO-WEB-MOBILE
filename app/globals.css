@@ -277,6 +277,43 @@ img {
   box-shadow: var(--shadow);
 }
 
+.global-search-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-type-chip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.search-type-chip.active {
+  color: #04101b;
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.global-search-group {
+  display: grid;
+  gap: 8px;
+}
+
+.global-search-group > p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .global-search-result {
   display: grid;
   gap: 6px;
@@ -1190,6 +1227,15 @@ img {
 .table-team-cell strong {
   display: block;
   color: var(--text);
+}
+
+.table-team-link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.table-team-link:hover strong {
+  color: var(--accent);
 }
 
 .table-team-cell span {

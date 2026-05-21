@@ -1,7 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+import MonitorButton from "@/components/MonitorButton";
 import { API_FOOTBALL_LEAGUES, buildCompetitionSourceMeta } from "@/lib/api-football";
+import { buildCompetitionMonitorItem, getTeamHrefByName } from "@/lib/monitoring-data";
 
 const SEASON_OPTIONS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018"];
 
@@ -180,6 +185,7 @@ function KnockoutMatchCard({ match }) {
 }
 
 export default function StandingsFullDashboard() {
+  const searchParams = useSearchParams();
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -231,6 +237,13 @@ export default function StandingsFullDashboard() {
   const phaseLabel = payload?.phaseLabel || "";
   const selectedLeague = API_FOOTBALL_LEAGUES.find((item) => item.appId === leagueId);
   const selectedSourceMeta = buildCompetitionSourceMeta(selectedLeague);
+  const requestedLeagueId = searchParams.get("league") || "";
+
+  useEffect(() => {
+    if (requestedLeagueId && API_FOOTBALL_LEAGUES.some((item) => item.appId === requestedLeagueId)) {
+      setLeagueId(requestedLeagueId);
+    }
+  }, [requestedLeagueId]);
 
   useEffect(() => {
     if (selectedLeague?.season) {
@@ -389,6 +402,13 @@ export default function StandingsFullDashboard() {
                 <p className="note-meta">
                   Edicoes recentes com fase classificatoria abrem em tabela. Copas e edicoes antigas priorizam o mata-mata.
                 </p>
+              ) : null}
+              {selectedLeague ? (
+                <div className="report-link-list">
+                  <MonitorButton
+                    item={buildCompetitionMonitorItem(selectedLeague)}
+                  />
+                </div>
               ) : null}
             </article>
           </div>
@@ -738,7 +758,9 @@ export default function StandingsFullDashboard() {
                         <div className="table-team-cell">
                           {team.logo ? <img src={team.logo} alt={team.name} /> : null}
                           <div>
-                            <strong>{team.name}</strong>
+                            <Link href={getTeamHrefByName(team.name)} className="table-team-link">
+                              <strong>{team.name}</strong>
+                            </Link>
                             <span>{team.shortName || league?.abbreviation || "Club"}</span>
                           </div>
                         </div>

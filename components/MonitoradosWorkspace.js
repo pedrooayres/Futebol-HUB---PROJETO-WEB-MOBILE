@@ -11,6 +11,14 @@ const TYPE_LABELS = {
   competition: "Competicao"
 };
 
+const TYPE_PLURALS = {
+  team: "Times",
+  player: "Jogadores",
+  competition: "Competicoes"
+};
+
+const TYPE_ORDER = ["competition", "team", "player"];
+
 export default function MonitoradosWorkspace() {
   const [items, setItems] = useState([]);
   const [typeFilter, setTypeFilter] = useState("Todos");
@@ -38,6 +46,16 @@ export default function MonitoradosWorkspace() {
     return items.filter((item) => TYPE_LABELS[item.type] === typeFilter);
   }, [items, typeFilter]);
 
+  const groupedItems = useMemo(
+    () =>
+      TYPE_ORDER.map((type) => ({
+        type,
+        label: TYPE_PLURALS[type],
+        items: filteredItems.filter((item) => item.type === type)
+      })).filter((group) => group.items.length > 0),
+    [filteredItems]
+  );
+
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
@@ -63,6 +81,10 @@ export default function MonitoradosWorkspace() {
             <strong>{items.filter((item) => item.type === "player").length}</strong>
             <span>Jogadores</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>{items.filter((item) => item.type === "competition").length}</strong>
+            <span>Competicoes</span>
+          </article>
         </div>
       </section>
 
@@ -86,21 +108,32 @@ export default function MonitoradosWorkspace() {
       </section>
 
       <section className="report-index-grid">
-        {filteredItems.map((item) => (
-          <article key={`${item.type}-${item.id}`} className="glass-panel report-index-card">
+        {groupedItems.map((group) => (
+          <article key={group.type} className="glass-panel report-index-card monitor-group-card">
             <div className="section-heading">
               <div>
-                <p className="panel-tag">{TYPE_LABELS[item.type] || "Item"}</p>
-                <h2>{item.title}</h2>
+                <p className="panel-tag">Monitorados</p>
+                <h2>{group.label}</h2>
               </div>
-              <span className="badge accent">{item.meta || "Monitorado"}</span>
+              <span className="badge accent">{group.items.length}</span>
             </div>
 
-            <p>{item.description}</p>
-
-            <Link href={item.href} className="inline-link">
-              Abrir perfil
-            </Link>
+            <div className="note-list">
+              {group.items.map((item) => (
+                <article key={`${item.type}-${item.id}`} className="note-card">
+                  <div className="note-header">
+                    <div>
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                    </div>
+                    <span className="status-pill">{item.meta || "Monitorado"}</span>
+                  </div>
+                  <Link href={item.href} className="inline-link">
+                    {item.type === "competition" ? "Abrir ranking" : "Abrir perfil"}
+                  </Link>
+                </article>
+              ))}
+            </div>
           </article>
         ))}
 

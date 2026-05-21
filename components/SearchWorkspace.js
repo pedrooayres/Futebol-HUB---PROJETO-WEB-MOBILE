@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
+const TYPE_FILTERS = ["Todos", "Time", "Jogador", "Competicao"];
 
 export default function SearchWorkspace() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [activeType, setActiveType] = useState("Todos");
 
   useEffect(() => {
     if (!query.trim()) {
@@ -42,6 +45,14 @@ export default function SearchWorkspace() {
     };
   }, [query]);
 
+  const filteredResults = useMemo(() => {
+    if (activeType === "Todos") {
+      return results;
+    }
+
+    return results.filter((item) => item.type === activeType);
+  }, [activeType, results]);
+
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
@@ -49,8 +60,7 @@ export default function SearchWorkspace() {
           <span className="eyebrow">Busca global</span>
           <h1>Resultados integrados</h1>
           <p>
-            Times, atletas, colecoes e relatorios reais na mesma camada de consulta para acelerar a
-            navegacao profissional.
+            Times, jogadores e competicoes na mesma camada de consulta para acelerar a navegacao do monitoramento.
           </p>
         </div>
 
@@ -65,17 +75,34 @@ export default function SearchWorkspace() {
           </article>
           <article className="mini-kpi-card">
             <strong>Unificado</strong>
-            <span>Indice ativo</span>
+            <span>Busca ativa</span>
           </article>
         </div>
       </section>
 
+      {query ? (
+        <section className="glass-panel filter-panel">
+          <div className="global-search-type-row">
+            {TYPE_FILTERS.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={`search-type-chip ${activeType === type ? "active" : ""}`}
+                onClick={() => setActiveType(type)}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="card-grid">
         {loading ? <p>Buscando dados...</p> : null}
-        {!loading && !query ? <p>Use a busca do topo para consultar clubes, atletas e relatorios.</p> : null}
-        {!loading && query && results.length === 0 ? <p>Nenhum resultado encontrado para essa pesquisa.</p> : null}
+        {!loading && !query ? <p>Use a busca do topo para consultar times, jogadores e competicoes.</p> : null}
+        {!loading && query && filteredResults.length === 0 ? <p>Nenhum resultado encontrado para essa pesquisa.</p> : null}
         {!loading
-          ? results.map((item) => {
+          ? filteredResults.map((item) => {
               return (
                 <article key={item.id} className="glass-panel report-index-card">
                   <div className="section-heading">
