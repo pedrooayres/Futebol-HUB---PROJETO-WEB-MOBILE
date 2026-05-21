@@ -9,6 +9,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/times", label: "Times" },
   { href: "/jogadores", label: "Jogadores" },
+  { href: "/monitorados", label: "Monitorados" },
   { href: "/ranking", label: "Ranking" }
 ];
 

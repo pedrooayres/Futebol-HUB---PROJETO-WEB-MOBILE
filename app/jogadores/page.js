@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 
-import { useAccess } from "@/components/AccessProvider";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
-import { dataSourceSummary, spotlightPlayers } from "@/lib/football-data";
-import { buildScoutingReport, toSlug } from "@/lib/report-utils";
+import MonitorButton from "@/components/MonitorButton";
+import { spotlightPlayers } from "@/lib/football-data";
 
 const ALL_FILTER = "Todos";
 
@@ -19,126 +18,35 @@ function normalizeText(value = "") {
 
 function buildStaticPlayerCard(player) {
   return {
-    id: `static-${player.slug}`,
+    id: player.slug,
     slug: player.slug,
     name: player.name,
     club: player.club,
     role: player.role,
-    rating: Number(player.rating || 0),
+    monitoringIndex: Number(player.rating || 0),
     status: player.status || "Monitorado",
-    priority: Number(player.rating || 0) >= 90 ? "Alta" : "Media",
-    marketMoment: player.marketMoment || "--",
-    contractStatus: player.contractStatus || "--",
     age: player.age || "--",
     foot: player.foot || "--",
     nationality: player.nationality || "--",
     summary: player.reportSummary || player.summary || "",
     strengths: player.strengths || [],
-    risks: player.concerns || [],
-    sourceLabel: player.source || "Perfil curado",
-    sourceType: "Perfil",
-    href: `/jogadores/${player.slug}`,
-    scoutingHref: "",
-    updatedAt: "",
-    isFavorite: false
-  };
-}
-
-function buildScoutingPlayerCard(report) {
-  const playerProfile = report.playerProfile;
-  const slug = playerProfile?.slug || toSlug(report.playerName);
-
-  return {
-    id: `scouting-${report.id || slug}`,
-    slug,
-    name: report.playerName,
-    club: report.club,
-    role: report.position,
-    rating: Number(report.rating || 0),
-    status: report.status || "Em observacao",
-    priority: report.priority || "Media",
-    marketMoment: report.recommendation || "Scouting ativo",
-    contractStatus: report.nextAction || "Revisar contexto",
-    age: playerProfile?.age || "--",
-    foot: playerProfile?.foot || "--",
-    nationality: playerProfile?.nationality || "--",
-    summary: report.summary,
-    strengths: report.strengths || [],
-    risks: report.risks || [],
-    sourceLabel: "Scouting interno",
-    sourceType: "Scouting",
-    href: playerProfile?.slug ? `/jogadores/${playerProfile.slug}` : `/scouting?report=${report.id}`,
-    scoutingHref: report.id ? `/scouting?report=${report.id}` : "",
-    updatedAt: report.updatedAt || "",
-    isFavorite: Boolean(report.isFavorite)
+    href: `/jogadores/${player.slug}`
   };
 }
 
 export default function PlayersPage() {
-  const { isCommon } = useAccess();
   const { applyOverride } = useEntityOverrides();
-  const [scoutingItems, setScoutingItems] = useState([]);
-  const [loadingScouting, setLoadingScouting] = useState(true);
-  const [scoutingMessage, setScoutingMessage] = useState("");
   const [query, setQuery] = useState("");
   const [clubFilter, setClubFilter] = useState(ALL_FILTER);
   const [roleFilter, setRoleFilter] = useState(ALL_FILTER);
-  const [statusFilter, setStatusFilter] = useState(ALL_FILTER);
-  const [sourceFilter, setSourceFilter] = useState(ALL_FILTER);
-  const [sortMode, setSortMode] = useState("rating");
+  const [nationalityFilter, setNationalityFilter] = useState(ALL_FILTER);
+  const [sortMode, setSortMode] = useState("index");
   const deferredQuery = useDeferredValue(query);
 
-  useEffect(() => {
-    let active = true;
-
-    async function loadScoutingPlayers() {
-      setLoadingScouting(true);
-      setScoutingMessage("");
-
-      try {
-        const response = await fetch("/api/scouting");
-        const data = await response.json();
-
-        if (!active) {
-          return;
-        }
-
-        setScoutingItems(data.items || []);
-        setScoutingMessage(data.message || "");
-      } catch (_error) {
-        if (active) {
-          setScoutingMessage("Nao foi possivel carregar a base de scouting agora.");
-        }
-      } finally {
-        if (active) {
-          setLoadingScouting(false);
-        }
-      }
-    }
-
-    loadScoutingPlayers();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const curatedPlayers = useMemo(
+  const players = useMemo(
     () => spotlightPlayers.map((player) => applyOverride("players", player)).map(buildStaticPlayerCard),
     [applyOverride]
   );
-
-  const scoutingPlayers = useMemo(
-    () => scoutingItems.map(buildScoutingReport).map(buildScoutingPlayerCard),
-    [scoutingItems]
-  );
-
-  const players = useMemo(() => {
-    const staticNames = new Set(curatedPlayers.map((player) => toSlug(player.name)));
-    const uniqueScoutingPlayers = scoutingPlayers.filter((player) => !staticNames.has(toSlug(player.name)));
-
-    return [...curatedPlayers, ...uniqueScoutingPlayers];
-  }, [curatedPlayers, scoutingPlayers]);
 
   const filterOptions = useMemo(() => {
     const unique = (items) => [ALL_FILTER, ...[...new Set(items.filter(Boolean))].sort((a, b) => a.localeCompare(b))];
@@ -146,8 +54,7 @@ export default function PlayersPage() {
     return {
       clubs: unique(players.map((player) => player.club)),
       roles: unique(players.map((player) => player.role)),
-      statuses: unique(players.map((player) => player.status)),
-      sources: unique(players.map((player) => player.sourceType))
+      nationalities: unique(players.map((player) => player.nationality))
     };
   }, [players]);
 
@@ -157,15 +64,14 @@ export default function PlayersPage() {
     return [...players]
       .filter((player) => {
         const searchable = normalizeText(
-          `${player.name} ${player.club} ${player.role} ${player.status} ${player.summary} ${player.strengths.join(" ")}`
+          `${player.name} ${player.club} ${player.role} ${player.nationality} ${player.summary} ${player.strengths.join(" ")}`
         );
         const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
         const matchesClub = clubFilter === ALL_FILTER || player.club === clubFilter;
         const matchesRole = roleFilter === ALL_FILTER || player.role === roleFilter;
-        const matchesStatus = statusFilter === ALL_FILTER || player.status === statusFilter;
-        const matchesSource = sourceFilter === ALL_FILTER || player.sourceType === sourceFilter;
+        const matchesNationality = nationalityFilter === ALL_FILTER || player.nationality === nationalityFilter;
 
-        return matchesQuery && matchesClub && matchesRole && matchesStatus && matchesSource;
+        return matchesQuery && matchesClub && matchesRole && matchesNationality;
       })
       .sort((a, b) => {
         if (sortMode === "name") {
@@ -173,35 +79,26 @@ export default function PlayersPage() {
         }
 
         if (sortMode === "club") {
-          return a.club.localeCompare(b.club) || b.rating - a.rating;
+          return a.club.localeCompare(b.club) || b.monitoringIndex - a.monitoringIndex;
         }
 
-        if (sortMode === "source") {
-          return a.sourceType.localeCompare(b.sourceType) || b.rating - a.rating;
-        }
-
-        if (sortMode === "updated") {
-          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-        }
-
-        return b.rating - a.rating;
+        return b.monitoringIndex - a.monitoringIndex;
       });
-  }, [clubFilter, deferredQuery, players, roleFilter, sortMode, sourceFilter, statusFilter]);
+  }, [clubFilter, deferredQuery, nationalityFilter, players, roleFilter, sortMode]);
 
-  const topRating = [...players].sort((a, b) => b.rating - a.rating)[0];
-  const approvedCount = players.filter((player) => /aprovado|prioridade|premium/i.test(player.status)).length;
-  const scoutingCount = scoutingPlayers.length;
+  const topPlayer = [...players].sort((a, b) => b.monitoringIndex - a.monitoringIndex)[0];
+  const clubCount = new Set(players.map((player) => player.club)).size;
+  const nationalityCount = new Set(players.map((player) => player.nationality)).size;
 
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
         <div>
-          <span className="eyebrow">Player Reports</span>
-          <h1>Relatorios de atletas</h1>
+          <span className="eyebrow">Monitoramento</span>
+          <h1>Monitoramento de jogadores</h1>
           <p>
-            {isCommon
-              ? "Veja rapidamente o momento do atleta, os sinais principais e uma ficha-base pronta para consulta."
-              : "Perfis individuais com leitura tecnica, contexto de mercado, recomendacoes de monitoramento e analise voltada para decisao profissional."}
+            Acompanhe jogadores em uma ficha simples, com clube atual, funcao, idade, nacionalidade e sinais
+            principais para consulta rapida.
           </p>
         </div>
 
@@ -215,12 +112,12 @@ export default function PlayersPage() {
             <span>Resultado filtrado</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{approvedCount}</strong>
-            <span>Prioridade tecnica</span>
+            <strong>{clubCount}</strong>
+            <span>Clubes mapeados</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{scoutingCount}</strong>
-            <span>Scouting interno</span>
+            <strong>{nationalityCount}</strong>
+            <span>Nacionalidades</span>
           </article>
         </div>
       </section>
@@ -228,10 +125,10 @@ export default function PlayersPage() {
       <section className="glass-panel filter-panel">
         <div className="section-heading">
           <div>
-            <p className="panel-tag">Base de atletas</p>
+            <p className="panel-tag">Base inicial</p>
             <h2>Filtros e ordenacao</h2>
           </div>
-          <span className="badge">{loadingScouting ? "Sincronizando" : dataSourceSummary.status}</span>
+          <span className="badge">Consulta local</span>
         </div>
 
         <div className="scout-toolbar four-columns">
@@ -263,20 +160,9 @@ export default function PlayersPage() {
           </label>
 
           <label>
-            Status
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              {filterOptions.statuses.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="scout-toolbar four-columns">
-          <label>
-            Origem
-            <select value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}>
-              {filterOptions.sources.map((item) => (
+            Nacionalidade
+            <select value={nationalityFilter} onChange={(event) => setNationalityFilter(event.target.value)}>
+              {filterOptions.nationalities.map((item) => (
                 <option key={item}>{item}</option>
               ))}
             </select>
@@ -285,26 +171,24 @@ export default function PlayersPage() {
           <label>
             Ordenar
             <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-              <option value="rating">Maior rating</option>
-              <option value="updated">Mais recentes</option>
+              <option value="index">Maior indice</option>
               <option value="name">Nome</option>
               <option value="club">Clube</option>
-              <option value="source">Origem</option>
             </select>
-          </label>
-
-          <label>
-            Destaque
-            <input value={topRating ? `${topRating.name} | ${topRating.rating}` : "--"} readOnly />
-          </label>
-
-          <label>
-            Pipeline
-            <input value={loadingScouting ? "Carregando scouting" : `${scoutingCount} registros`} readOnly />
           </label>
         </div>
 
-        {scoutingMessage ? <p className="warning">{scoutingMessage}</p> : null}
+        <div className="scout-toolbar two-columns">
+          <label>
+            Destaque
+            <input value={topPlayer ? `${topPlayer.name} | indice ${topPlayer.monitoringIndex}` : "--"} readOnly />
+          </label>
+
+          <label>
+            Cobertura
+            <input value={`${players.length} jogadores na base inicial`} readOnly />
+          </label>
+        </div>
       </section>
 
       <section className="report-index-grid">
@@ -316,8 +200,7 @@ export default function PlayersPage() {
                 <h2>{player.name}</h2>
               </div>
               <div className="result-badge-row">
-                <span className="badge accent">{player.rating}</span>
-                <span className="badge">{player.sourceType}</span>
+                <span className="badge accent">Indice {player.monitoringIndex}</span>
               </div>
             </div>
 
@@ -328,22 +211,18 @@ export default function PlayersPage() {
                 <span className="detail-label">Funcao</span>
                 <strong>{player.role}</strong>
               </div>
-              {!isCommon ? (
-                <>
-                  <div>
-                    <span className="detail-label">Mercado</span>
-                    <strong>{player.marketMoment}</strong>
-                  </div>
-                  <div>
-                    <span className="detail-label">Status</span>
-                    <strong>{player.status}</strong>
-                  </div>
-                  <div>
-                    <span className="detail-label">Idade</span>
-                    <strong>{player.age}</strong>
-                  </div>
-                </>
-              ) : null}
+              <div>
+                <span className="detail-label">Idade</span>
+                <strong>{player.age}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Nacionalidade</span>
+                <strong>{player.nationality}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Pe</span>
+                <strong>{player.foot}</strong>
+              </div>
             </div>
 
             <div className="report-tag-row">
@@ -353,25 +232,28 @@ export default function PlayersPage() {
             </div>
 
             <div className="report-link-list">
+              <MonitorButton
+                item={{
+                  id: player.slug,
+                  type: "player",
+                  title: player.name,
+                  meta: player.club,
+                  description: `${player.role} | ${player.nationality}`,
+                  href: player.href
+                }}
+              />
               <Link href={player.href} className="inline-link">
-                {player.sourceType === "Scouting" && !player.href.startsWith("/jogadores")
-                  ? "Abrir relatorio de scouting"
-                  : "Abrir perfil completo"}
+                Abrir jogador
               </Link>
-              {player.scoutingHref ? (
-                <Link href={player.scoutingHref} className="inline-link">
-                  Abrir registro interno
-                </Link>
-              ) : null}
             </div>
           </article>
         ))}
 
-        {!loadingScouting && filteredPlayers.length === 0 ? (
+        {filteredPlayers.length === 0 ? (
           <article className="glass-panel report-index-card">
             <p className="panel-tag">Sem resultado</p>
             <h2>Nenhum atleta combina com os filtros</h2>
-            <p>Ajuste busca, clube, funcao, status ou origem para ampliar a leitura da base.</p>
+            <p>Ajuste busca, clube, funcao ou nacionalidade para ampliar a leitura da base.</p>
           </article>
         ) : null}
       </section>

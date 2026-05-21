@@ -65,8 +65,8 @@ export default function GlobalSearch() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar clube, atleta ou relatorio"
-          aria-label="Buscar clube, atleta ou relatorio"
+          placeholder="Buscar time, jogador ou competicao"
+          aria-label="Buscar time, jogador ou competicao"
         />
         <button type="submit" className="ghost-button">
           Buscar

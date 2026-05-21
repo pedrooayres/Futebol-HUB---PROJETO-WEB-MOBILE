@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { useAccess } from "@/components/AccessProvider";
 import { useEntityOverrides } from "@/components/EntityOverridesProvider";
+import MonitorButton from "@/components/MonitorButton";
 import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 
 export default function TeamsPage() {
-  const { isCommon } = useAccess();
   const { applyOverride } = useEntityOverrides();
   const teams = useMemo(() => featuredTeams.map((team) => applyOverride("teams", team)), [applyOverride]);
-  const averageRating = (
+  const averageIndex = (
     teams.reduce((sum, team) => sum + team.rating, 0) / teams.length
   ).toFixed(1);
 
@@ -19,31 +18,30 @@ export default function TeamsPage() {
     <main className="page-shell page-stack">
       <section className="section-banner">
         <div>
-          <span className="eyebrow">Club Reports</span>
-          <h1>Relatorios de times</h1>
+          <span className="eyebrow">Clubes</span>
+          <h1>Monitoramento de times</h1>
           <p>
-            {isCommon
-              ? "Acompanhe rapidamente o momento dos clubes, os ultimos sinais competitivos e uma ficha-base de cada time."
-              : "Visao executiva para profissionais de scouting, coordenacao e mercado com leitura de identidade, risco, necessidade de elenco e oportunidade de monitoramento."}
+            Acompanhe clubes em uma visao direta, com competicao, modelo de jogo, momento recente e sinais
+            principais para consulta rapida.
           </p>
         </div>
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
             <strong>{teams.length}</strong>
-            <span>Relatorios ativos</span>
+            <span>Times monitorados</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{averageRating}</strong>
-            <span>Rating medio</span>
+            <strong>{averageIndex}</strong>
+            <span>Indice medio</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{isCommon ? "Direto" : "Profissional"}</strong>
-            <span>{isCommon ? "Leitura rapida" : "Uso orientado a decisao"}</span>
+            <strong>Direto</strong>
+            <span>Leitura rapida</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{dataSourceSummary.status}</strong>
-            <span>Pipeline externo</span>
+            <span>Base inicial</span>
           </article>
         </div>
       </section>
@@ -57,7 +55,7 @@ export default function TeamsPage() {
                 <h2>{team.name}</h2>
               </div>
               <div className="result-badge-row">
-                <span className="badge accent">{team.rating}</span>
+                <span className="badge accent">Indice {team.rating}</span>
               </div>
             </div>
 
@@ -72,12 +70,10 @@ export default function TeamsPage() {
                 <span className="detail-label">Momento</span>
                 <strong>{team.phase}</strong>
               </div>
-              {!isCommon ? (
-                <div>
-                  <span className="detail-label">Foco de mercado</span>
-                  <strong>{team.marketFocus}</strong>
-                </div>
-              ) : null}
+              <div>
+                <span className="detail-label">Competicao</span>
+                <strong>{team.league}</strong>
+              </div>
             </div>
 
             <div className="report-tag-row">
@@ -86,9 +82,21 @@ export default function TeamsPage() {
               ))}
             </div>
 
-            <Link href={`/times/${team.slug}`} className="inline-link">
-              Abrir relatorio completo
-            </Link>
+            <div className="report-link-list">
+              <MonitorButton
+                item={{
+                  id: team.slug,
+                  type: "team",
+                  title: team.name,
+                  meta: team.league,
+                  description: `${team.system} | ${team.phase}`,
+                  href: `/times/${team.slug}`
+                }}
+              />
+              <Link href={`/times/${team.slug}`} className="inline-link">
+                Abrir time
+              </Link>
+            </div>
           </article>
         ))}
       </section>
