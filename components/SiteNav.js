@@ -3,23 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useAccess } from "@/components/AccessProvider";
 import GlobalSearch from "@/components/GlobalSearch";
 
 const navItems = [
   { href: "/", label: "Home" },
   { href: "/times", label: "Times" },
   { href: "/jogadores", label: "Jogadores" },
-  { href: "/ranking", label: "Ranking" },
-  { href: "/relatorios", label: "Relatórios" },
-  { href: "/scouting", label: "Scouting" }
+  { href: "/ranking", label: "Ranking" }
 ];
 
 export default function SiteNav() {
   const pathname = usePathname();
-  const { role, ready, logoutRole, reopenSelector } = useAccess();
-  const modeLabel =
-    role === "common" ? "Usuário padrão" : role === "professional" ? "Profissional" : "Admin";
 
   return (
     <header className="site-header">
@@ -28,7 +22,7 @@ export default function SiteNav() {
           <span className="brand-ball">F</span>
           <div>
             <strong>Futebol HUB Pro</strong>
-            <span>Inteligência esportiva e scouting</span>
+            <span>Monitoramento de futebol</span>
           </div>
         </Link>
 
@@ -49,17 +43,6 @@ export default function SiteNav() {
         </nav>
 
         <GlobalSearch />
-
-        {ready && role ? (
-          <div className="nav-session-actions">
-            <button type="button" className="ghost-button access-switcher" onClick={reopenSelector}>
-              {modeLabel}
-            </button>
-            <button type="button" className="ghost-button access-switcher" onClick={logoutRole}>
-              Sair
-            </button>
-          </div>
-        ) : null}
       </div>
     </header>
   );

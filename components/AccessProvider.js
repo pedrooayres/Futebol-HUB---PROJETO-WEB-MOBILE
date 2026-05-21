@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 const AccessContext = createContext(null);
 
 const STORAGE_KEY = "futebol-hub-access-role";
+const DEFAULT_ROLE = "professional";
 
 export function AccessProvider({ children }) {
   const [role, setRole] = useState("");
@@ -14,9 +15,9 @@ export function AccessProvider({ children }) {
   const [adminError, setAdminError] = useState("");
 
   useEffect(() => {
-    const storedRole = window.localStorage.getItem(STORAGE_KEY) || "";
+    const storedRole = window.localStorage.getItem(STORAGE_KEY) || DEFAULT_ROLE;
     setRole(storedRole);
-    setShowSelector(!storedRole);
+    setShowSelector(false);
     setReady(true);
   }, []);
 
@@ -33,9 +34,9 @@ export function AccessProvider({ children }) {
   }
 
   function logoutRole() {
-    window.localStorage.removeItem(STORAGE_KEY);
-    setRole("");
-    setShowSelector(true);
+    window.localStorage.setItem(STORAGE_KEY, DEFAULT_ROLE);
+    setRole(DEFAULT_ROLE);
+    setShowSelector(false);
     setAdminError("");
   }
 

@@ -1,12 +1,11 @@
 import "./globals.css";
 import { AccessProvider } from "@/components/AccessProvider";
-import AccessSelector from "@/components/AccessSelector";
 import { EntityOverridesProvider } from "@/components/EntityOverridesProvider";
 import SiteNav from "@/components/SiteNav";
 
 export const metadata = {
   title: "Futebol HUB Pro",
-  description: "Plataforma de inteligência esportiva, scouting, dados externos e CRUD integrado ao Back4App."
+  description: "Plataforma de monitoramento esportivo para times, jogadores, competições e notícias."
 };
 
 export default function RootLayout({ children }) {
@@ -16,7 +15,6 @@ export default function RootLayout({ children }) {
         <AccessProvider>
           <EntityOverridesProvider>
             <SiteNav />
-            <AccessSelector />
             {children}
           </EntityOverridesProvider>
         </AccessProvider>
