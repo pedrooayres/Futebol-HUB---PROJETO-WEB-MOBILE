@@ -6,16 +6,31 @@ import {
   hasLiveScoreConfig
 } from "@/lib/api-football";
 import { publicErrorMessage } from "@/lib/api-errors";
-import { fallbackStandingsByLeague } from "@/lib/football-data";
+import { fallbackStandingsByLeague, featuredTeams } from "@/lib/football-data";
 import { fetchJson } from "@/lib/http-client";
+
+export const revalidate = 21600;
 
 const DEFAULT_LEAGUE = "eng.1";
 const DEFAULT_SEASON = "2025";
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400"
+};
 const STANDINGS_HOSTS = [
   "https://api-football-standings.azharimm.dev",
   "https://api-football-standings.azharimm.site"
 ];
 const LIVESCORE_BASE_URL = "https://livescore-api.com/api-client";
+
+function jsonResponse(payload, init = {}) {
+  return NextResponse.json(payload, {
+    ...init,
+    headers: {
+      ...CACHE_HEADERS,
+      ...(init.headers || {})
+    }
+  });
+}
 
 function buildLiveScoreUrl(pathname, searchParams = {}) {
   const url = new URL(`${LIVESCORE_BASE_URL}${pathname}`);
@@ -468,10 +483,10 @@ function buildFallbackPayload(leagueId, season) {
   const leagueData = fallbackStandingsByLeague[leagueId];
 
   if (!leagueData) {
-    return buildUnavailablePayload(
+    return buildSeededFallbackPayload(
       leagueId,
       season,
-      "Sem fallback local confiável para essa competição/temporada."
+      "Sem tabela externa disponivel. Exibindo base inicial de monitoramento para manter o ranking navegavel."
     );
   }
 
@@ -558,6 +573,126 @@ function buildFallbackPayload(leagueId, season) {
   };
 }
 
+function buildSeededFallbackPayload(leagueId, season, message) {
+  const competition = getApiFootballLeagueConfig(leagueId);
+  const countryMap = {
+    Brazil: "Brasil",
+    Argentina: "Argentina",
+    England: "Inglaterra",
+    Spain: "Espanha",
+    Italy: "Italia",
+    Germany: "Alemanha",
+    France: "Franca",
+    Portugal: "Portugal",
+    Netherlands: "Holanda",
+    Turkey: "Turquia"
+  };
+  const countryLabel = countryMap[competition?.country] || competition?.country || "";
+  const countryTeams = featuredTeams.filter((team) => {
+    const league = String(team.league || "").toLowerCase();
+    return countryLabel && league.includes(String(countryLabel).toLowerCase());
+  });
+  const sourceTeams = countryTeams.length > 0 ? countryTeams : featuredTeams.slice(0, 8);
+  const rows = sourceTeams.slice(0, 12).map((team, index) => {
+    const rating = normalizeNumber(team.rating) || 70;
+    const points = Math.max(20, Math.round(rating * 0.8) - index);
+    const gamesPlayed = 20;
+    const wins = Math.max(0, Math.round(points / 3) - 1);
+    const draws = Math.max(0, points - wins * 3);
+    const losses = Math.max(0, gamesPlayed - wins - draws);
+    const goalsFor = Math.max(10, Math.round(rating * 0.55) - index);
+    const goalsAgainst = Math.max(8, Math.round(60 - rating * 0.35) + index);
+    const goalDifference = goalsFor - goalsAgainst;
+
+    return {
+      id: `${leagueId}-${team.slug || index}-${season}`,
+      rank: index + 1,
+      name: team.name,
+      shortName: team.name.slice(0, 3).toUpperCase(),
+      logo: "",
+      note: "Base inicial exibida enquanto a fonte externa esta indisponivel.",
+      points,
+      gamesPlayed,
+      wins,
+      draws,
+      losses,
+      goalsFor,
+      goalsAgainst,
+      goalDifference,
+      performance: getPerformance(points, gamesPlayed),
+      form: "--",
+      stats: [],
+      statMap: {
+        rank: String(index + 1),
+        gamesPlayed: String(gamesPlayed),
+        wins: String(wins),
+        draws: String(draws),
+        losses: String(losses),
+        points: String(points),
+        goalsFor: String(goalsFor),
+        goalsAgainst: String(goalsAgainst),
+        goalDifference: String(goalDifference),
+        form: "--"
+      }
+    };
+  });
+
+  const leaderBy = (selector, sort = "desc") =>
+    [...rows]
+      .sort((a, b) => {
+        const result = selector(a) - selector(b);
+        return sort === "asc" ? result : -result;
+      })[0] || null;
+
+  return {
+    mode: "standings",
+    activeView: "standings",
+    availableViews: ["standings"],
+    requestMeta: {
+      leagueId,
+      season: Number(season),
+      fallback: true
+    },
+    league: {
+      name: competition?.label || "Competicao",
+      abbreviation: competition?.label || "",
+      seasonDisplay: `${season}/${Number(season) + 1}`,
+      season: Number(season),
+      country: competition?.country || ""
+    },
+    summary: {
+      teams: rows.length,
+      averagePoints: rows.length
+        ? Number((rows.reduce((sum, item) => sum + item.points, 0) / rows.length).toFixed(1))
+        : 0,
+      averageGoalsFor: rows.length
+        ? Number((rows.reduce((sum, item) => sum + item.goalsFor, 0) / rows.length).toFixed(1))
+        : 0,
+      maximumPoints: leaderBy((item) => item.points)?.points || 0
+    },
+    leaders: {
+      tableLeader: leaderBy((item) => item.points),
+      bestAttack: leaderBy((item) => item.goalsFor),
+      bestDefense: leaderBy((item) => item.goalsAgainst, "asc"),
+      mostWins: leaderBy((item) => item.wins)
+    },
+    charts: {
+      points: rows.slice(0, 8).map((item) => ({ id: item.id, label: item.shortName, value: item.points })),
+      attack: [...rows]
+        .sort((a, b) => b.goalsFor - a.goalsFor)
+        .slice(0, 8)
+        .map((item) => ({ id: item.id, label: item.shortName, value: item.goalsFor })),
+      defense: [...rows]
+        .sort((a, b) => a.goalsAgainst - b.goalsAgainst)
+        .slice(0, 8)
+        .map((item) => ({ id: item.id, label: item.shortName, value: item.goalsAgainst }))
+    },
+    rows,
+    source: "fallback-seeded",
+    message
+  };
+}
+
 function buildUnavailablePayload(leagueId, season, message) {
   const competition = getApiFootballLeagueConfig(leagueId);
 
@@ -591,22 +726,35 @@ export async function GET(request) {
 
   try {
     const liveScoreConfig = getApiFootballLeagueConfig(leagueId);
+    let apiFootballError = null;
+
+    if (hasApiFootballKey()) {
+      try {
+        const payload = await getApiFootballStandings(leagueId, season);
+        return jsonResponse({
+          ...payload,
+          message: payload.message || "Tabela carregada pela fonte gratuita API-Football."
+        });
+      } catch (error) {
+        apiFootballError = error;
+      }
+    }
 
     if (liveScoreConfig?.providerHint === "livescore-api" && liveScoreConfig?.competitionId && hasLiveScoreConfig()) {
       try {
         if (liveScoreConfig.type === "Cup" && view === "knockout") {
           const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
-          return NextResponse.json(liveScoreKnockoutPayload);
+          return jsonResponse(liveScoreKnockoutPayload);
         }
 
         try {
           const liveScorePayload = await getLiveScoreStandings(leagueId, season);
-          return NextResponse.json(liveScorePayload);
+          return jsonResponse(liveScorePayload);
         } catch (standingsError) {
           const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season).catch(() => null);
 
           if (liveScoreKnockoutPayload && (liveScoreConfig.type === "Cup" || hasLiveScoreMatchCoverage(liveScoreKnockoutPayload))) {
-            return NextResponse.json({
+            return jsonResponse({
               ...liveScoreKnockoutPayload,
               message:
                 liveScoreConfig.type === "Cup"
@@ -615,8 +763,8 @@ export async function GET(request) {
             });
           }
 
-          return NextResponse.json(
-            buildUnavailablePayload(
+          return jsonResponse(
+            buildFallbackPayload(
               leagueId,
               season,
               `Sem tabela histórica confiável para esta competição: ${publicErrorMessage(standingsError)}`
@@ -624,19 +772,8 @@ export async function GET(request) {
           );
         }
       } catch (liveScoreError) {
-        if (hasApiFootballKey()) {
-          const apiFootballPayload = await getApiFootballStandings(leagueId, season);
-          return NextResponse.json({
-            ...apiFootballPayload,
-            message: `LiveScore indisponível. Fallback em API-Football: ${publicErrorMessage(liveScoreError)}`
-          });
-        }
+        apiFootballError = apiFootballError || liveScoreError;
       }
-    }
-
-    if (hasApiFootballKey()) {
-      const payload = await getApiFootballStandings(leagueId, season);
-      return NextResponse.json(payload);
     }
 
     let response = null;
@@ -646,7 +783,7 @@ export async function GET(request) {
     for (const host of STANDINGS_HOSTS) {
       try {
         const result = await fetchJson(buildStandingsUrl(host, leagueId, season), {
-          next: { revalidate: 3600 }
+          next: { revalidate: 21600 }
         }, { timeoutMs: 8000 });
         response = result.response;
 
@@ -663,7 +800,7 @@ export async function GET(request) {
 
     if (!data) {
       const fallbackPayload = buildFallbackPayload(leagueId, season);
-      return NextResponse.json({
+      return jsonResponse({
         ...fallbackPayload,
         message:
           fallbackPayload.mode === "unavailable"
@@ -774,7 +911,7 @@ export async function GET(request) {
       maximumPoints: leaders.tableLeader?.points || 0
     };
 
-    return NextResponse.json({
+    return jsonResponse({
       requestMeta: {
         leagueId,
         season: Number(season)
@@ -793,7 +930,7 @@ export async function GET(request) {
     });
   } catch (error) {
     const fallbackPayload = buildFallbackPayload(leagueId, season);
-    return NextResponse.json({
+    return jsonResponse({
       ...fallbackPayload,
       message: publicErrorMessage(error, fallbackPayload.message)
     });

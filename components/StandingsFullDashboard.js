@@ -95,6 +95,10 @@ function getSourceLabel(source) {
     return "Standings API";
   }
 
+  if (source === "fallback-seeded") {
+    return "Base local";
+  }
+
   return "Fallback";
 }
 
