@@ -15,20 +15,26 @@ export default function TeamProfileClient({ team }) {
   const { applyOverride } = useEntityOverrides();
   const [editing, setEditing] = useState(false);
   const resolvedTeam = applyOverride("teams", team);
+  const sportsDbMeta = resolvedTeam.externalMeta?.theSportsDb || null;
 
   return (
     <main className="page-shell page-stack">
       <section className="section-banner">
-        <div>
-          <span className="eyebrow">Team Report</span>
-          <h1>{resolvedTeam.name}</h1>
-          <p>{resolvedTeam.reportSummary}</p>
+        <div className="team-hero-heading">
+          {resolvedTeam.logo ? (
+            <img src={resolvedTeam.logo} alt={`${resolvedTeam.name} escudo`} className="team-hero-badge" />
+          ) : null}
+          <div>
+            <span className="eyebrow">Time monitorado</span>
+            <h1>{resolvedTeam.name}</h1>
+            <p>{resolvedTeam.reportSummary}</p>
+          </div>
         </div>
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{resolvedTeam.rating}</strong>
-            <span>Rating geral</span>
+            <strong>{sportsDbMeta?.formedYear || resolvedTeam.rating}</strong>
+            <span>{sportsDbMeta?.formedYear ? "Fundacao" : "Indice geral"}</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{resolvedTeam.system}</strong>
@@ -39,8 +45,8 @@ export default function TeamProfileClient({ team }) {
             <span>Momento competitivo</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{resolvedTeam.source}</strong>
-            <span>Origem do perfil</span>
+            <strong>{sportsDbMeta ? "TheSportsDB" : resolvedTeam.source}</strong>
+            <span>Metadados</span>
           </article>
         </div>
       </section>
@@ -79,6 +85,53 @@ export default function TeamProfileClient({ team }) {
           <p>{resolvedTeam.newsPulse || "Use o modo admin para registrar leitura manual de noticias, valor de mercado e contexto do clube."}</p>
         </article>
       </section>
+
+      {sportsDbMeta ? (
+        <section className="professional-grid">
+          <article className="glass-panel">
+            <div className="section-heading">
+              <div>
+                <p className="panel-tag">Metadados externos</p>
+                <h2>Identidade do clube</h2>
+              </div>
+              <span className="badge">TheSportsDB</span>
+            </div>
+
+            <div className="report-meta-grid">
+              <div>
+                <span className="detail-label">Liga</span>
+                <strong>{sportsDbMeta.league || resolvedTeam.league}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Pais</span>
+                <strong>{sportsDbMeta.country || "--"}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Estadio</span>
+                <strong>{sportsDbMeta.stadium || "--"}</strong>
+              </div>
+              <div>
+                <span className="detail-label">Cidade</span>
+                <strong>{sportsDbMeta.stadiumLocation || "--"}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article className="glass-panel">
+            <div className="section-heading">
+              <div>
+                <p className="panel-tag">Resumo publico</p>
+                <h2>Contexto cadastral</h2>
+              </div>
+            </div>
+            <p>
+              {sportsDbMeta.description
+                ? `${sportsDbMeta.description.slice(0, 360)}${sportsDbMeta.description.length > 360 ? "..." : ""}`
+                : "Metadados externos carregados sem descricao publica para este clube."}
+            </p>
+          </article>
+        </section>
+      ) : null}
 
       <section className="professional-grid">
         <article className="glass-panel">

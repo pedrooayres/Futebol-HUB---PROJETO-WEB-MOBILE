@@ -8,6 +8,7 @@ import {
 import { publicErrorMessage } from "@/lib/api-errors";
 import { fallbackStandingsByLeague, featuredTeams } from "@/lib/football-data";
 import { fetchJson } from "@/lib/http-client";
+import { enrichTeamsWithTheSportsDb } from "@/lib/thesportsdb";
 
 export const revalidate = 21600;
 
@@ -48,6 +49,23 @@ function buildLiveScoreUrl(pathname, searchParams = {}) {
 
 function buildStandingsUrl(host, league, season) {
   return `${host}/leagues/${league}/standings?season=${season}&sort=asc`;
+}
+
+async function enrichPayloadTeams(payload) {
+  if (!payload?.rows?.length) {
+    return payload;
+  }
+
+  const rows = await enrichTeamsWithTheSportsDb(payload.rows);
+
+  return {
+    ...payload,
+    rows,
+    enrichment: {
+      ...(payload.enrichment || {}),
+      teamMetadata: "TheSportsDB"
+    }
+  };
 }
 
 function normalizeNumber(value) {
@@ -731,10 +749,10 @@ export async function GET(request) {
     if (hasApiFootballKey()) {
       try {
         const payload = await getApiFootballStandings(leagueId, season);
-        return jsonResponse({
+        return jsonResponse(await enrichPayloadTeams({
           ...payload,
           message: payload.message || "Tabela carregada pela fonte gratuita API-Football."
-        });
+        }));
       } catch (error) {
         apiFootballError = error;
       }
@@ -744,32 +762,32 @@ export async function GET(request) {
       try {
         if (liveScoreConfig.type === "Cup" && view === "knockout") {
           const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season);
-          return jsonResponse(liveScoreKnockoutPayload);
+          return jsonResponse(await enrichPayloadTeams(liveScoreKnockoutPayload));
         }
 
         try {
           const liveScorePayload = await getLiveScoreStandings(leagueId, season);
-          return jsonResponse(liveScorePayload);
+          return jsonResponse(await enrichPayloadTeams(liveScorePayload));
         } catch (standingsError) {
           const liveScoreKnockoutPayload = await getLiveScoreKnockoutPayload(leagueId, season).catch(() => null);
 
           if (liveScoreKnockoutPayload && (liveScoreConfig.type === "Cup" || hasLiveScoreMatchCoverage(liveScoreKnockoutPayload))) {
-            return jsonResponse({
+            return jsonResponse(await enrichPayloadTeams({
               ...liveScoreKnockoutPayload,
               message:
                 liveScoreConfig.type === "Cup"
                   ? "Tabela classificatória indisponível na LiveScore. Exibindo agenda, histórico e mata-mata quando disponível."
                   : "Tabela classificatória indisponível na LiveScore. Exibindo agenda e histórico da competição."
-            });
+            }));
           }
 
-          return jsonResponse(
+          return jsonResponse(await enrichPayloadTeams(
             buildFallbackPayload(
               leagueId,
               season,
               `Sem tabela histórica confiável para esta competição: ${publicErrorMessage(standingsError)}`
             )
-          );
+          ));
         }
       } catch (liveScoreError) {
         apiFootballError = apiFootballError || liveScoreError;
@@ -800,13 +818,13 @@ export async function GET(request) {
 
     if (!data) {
       const fallbackPayload = buildFallbackPayload(leagueId, season);
-      return jsonResponse({
+      return jsonResponse(await enrichPayloadTeams({
         ...fallbackPayload,
         message:
           fallbackPayload.mode === "unavailable"
             ? publicErrorMessage(lastError, fallbackPayload.message) || fallbackPayload.message
             : publicErrorMessage(lastError, "Dados externos indisponíveis. Fallback local em uso.")
-      });
+      }));
     }
     const standings = data?.data?.standings || [];
 
@@ -911,7 +929,7 @@ export async function GET(request) {
       maximumPoints: leaders.tableLeader?.points || 0
     };
 
-    return jsonResponse({
+    return jsonResponse(await enrichPayloadTeams({
       requestMeta: {
         leagueId,
         season: Number(season)
@@ -930,9 +948,9 @@ export async function GET(request) {
     });
   } catch (error) {
     const fallbackPayload = buildFallbackPayload(leagueId, season);
-    return jsonResponse({
+    return jsonResponse(await enrichPayloadTeams({
       ...fallbackPayload,
       message: publicErrorMessage(error, fallbackPayload.message)
-    });
+    }));
   }
 }
