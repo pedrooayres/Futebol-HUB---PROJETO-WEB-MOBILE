@@ -19,23 +19,23 @@ export default function PlayerProfileClient({ player, team }) {
     <main className="page-shell page-stack">
       <section className="section-banner">
         <div>
-          <span className="eyebrow">Player Report</span>
+          <span className="eyebrow">Jogador monitorado</span>
           <h1>{resolvedPlayer.name}</h1>
           <p>{resolvedPlayer.reportSummary}</p>
         </div>
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{resolvedPlayer.rating}</strong>
-            <span>Rating geral</span>
+            <strong>{resolvedPlayer.role}</strong>
+            <span>Funcao</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{resolvedPlayer.status}</strong>
-            <span>Status interno</span>
+            <span>Status</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{resolvedPlayer.contractStatus}</strong>
-            <span>Leitura de mercado</span>
+            <span>Situacao</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{resolvedPlayer.source}</strong>
@@ -55,7 +55,7 @@ export default function PlayerProfileClient({ player, team }) {
               Editar perfil
             </button>
           </div>
-          <p>Ajuste o cadastro tecnico do atleta sem sair do perfil individual.</p>
+          <p>Ajuste informacoes exibidas no perfil do atleta sem sair desta pagina.</p>
         </section>
       ) : null}
 
@@ -67,11 +67,11 @@ export default function PlayerProfileClient({ player, team }) {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Mercado manual</p>
-              <h2>Leitura complementar</h2>
+              <p className="panel-tag">Contexto publico</p>
+              <h2>Atualizacoes complementares</h2>
             </div>
           </div>
-          <p>{resolvedPlayer.newsPulse || "Use o modo admin para registrar leitura manual de noticias, valor de mercado e mercado do atleta."}</p>
+          <p>{resolvedPlayer.newsPulse || "Use o modo admin para registrar contexto publico, noticias e atualizacoes do atleta."}</p>
         </article>
       </section>
 
@@ -104,8 +104,8 @@ export default function PlayerProfileClient({ player, team }) {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Leitura quantitativa</p>
-              <h2>Indices de observacao</h2>
+              <p className="panel-tag">Indicadores</p>
+              <h2>Perfil de desempenho</h2>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export default function PlayerProfileClient({ player, team }) {
               <strong>{resolvedPlayer.metrics.tactical}</strong>
             </div>
             <div className="mini-bar-row">
-              <span>Projecao</span>
+              <span>Participacao</span>
               <div className="chart-track">
                 <div className="chart-fill" style={{ width: `${resolvedPlayer.metrics.projection}%` }} />
               </div>
@@ -232,7 +232,7 @@ export default function PlayerProfileClient({ player, team }) {
             <p>{resolvedPlayer.availability.note}</p>
 
             <div className="divider-line" />
-            <span className="detail-label">Trend ratings</span>
+            <span className="detail-label">Serie recente</span>
             <div className="trend-rating-row">
               {resolvedPlayer.trendRatings.map((item, index) => (
                 <span key={`${resolvedPlayer.slug}-${index}`} className="trend-chip">
@@ -255,8 +255,8 @@ export default function PlayerProfileClient({ player, team }) {
 
         <section className="professional-grid">
           <article className="glass-panel">
-            <p className="panel-tag">Forcas</p>
-            <h2>Recursos principais</h2>
+            <p className="panel-tag">Caracteristicas</p>
+            <h2>Informacoes principais</h2>
             <ul className="feature-list">
               {resolvedPlayer.strengths.map((item) => (
                 <li key={item}>{item}</li>
@@ -265,8 +265,8 @@ export default function PlayerProfileClient({ player, team }) {
           </article>
 
           <article className="glass-panel">
-            <p className="panel-tag">Pontos de atencao</p>
-            <h2>Riscos de avaliacao</h2>
+            <p className="panel-tag">Observacoes</p>
+            <h2>Pontos de acompanhamento</h2>
             <ul className="feature-list">
               {resolvedPlayer.concerns.map((item) => (
                 <li key={item}>{item}</li>
@@ -292,7 +292,7 @@ export default function PlayerProfileClient({ player, team }) {
 
           <article className="glass-panel">
             <p className="panel-tag">Finalizacao</p>
-            <h2>Shot profile</h2>
+            <h2>Perfil de finalizacao</h2>
             <div className="report-meta-grid">
               <div>
                 <span className="detail-label">Chutes</span>
@@ -311,8 +311,8 @@ export default function PlayerProfileClient({ player, team }) {
         </section>
 
         <article className="glass-panel">
-          <p className="panel-tag">Recomendacoes</p>
-          <h2>Proximos passos de monitoramento</h2>
+          <p className="panel-tag">Acompanhamento</p>
+          <h2>Proximas atualizacoes</h2>
           <ul className="feature-list">
             {resolvedPlayer.recommendations.map((item) => (
               <li key={item}>{item}</li>

@@ -10,9 +10,7 @@ import { dataSourceSummary, featuredTeams } from "@/lib/football-data";
 export default function TeamsPage() {
   const { applyOverride } = useEntityOverrides();
   const teams = useMemo(() => featuredTeams.map((team) => applyOverride("teams", team)), [applyOverride]);
-  const averageIndex = (
-    teams.reduce((sum, team) => sum + team.rating, 0) / teams.length
-  ).toFixed(1);
+  const activeTeamsCount = teams.length;
   const sourceLabel = dataSourceSummary.provider || dataSourceSummary.status || "Base local";
 
   return (
@@ -33,8 +31,8 @@ export default function TeamsPage() {
             <span>Times monitorados</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{averageIndex}</strong>
-            <span>Indice medio</span>
+            <strong>{activeTeamsCount}</strong>
+            <span>Perfis ativos</span>
           </article>
           <article className="mini-kpi-card">
             <strong>Direto</strong>
@@ -56,7 +54,7 @@ export default function TeamsPage() {
                 <h2>{team.name}</h2>
               </div>
               <div className="result-badge-row">
-                <span className="badge accent">Indice {team.rating}</span>
+                <span className="badge accent">{team.phase}</span>
                 <span className="badge">{team.source || sourceLabel}</span>
               </div>
             </div>

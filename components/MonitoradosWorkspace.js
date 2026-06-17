@@ -72,7 +72,7 @@ export default function MonitoradosWorkspace() {
     <main className="page-shell page-stack">
       <section className="section-banner">
         <div>
-          <span className="eyebrow">Meu radar</span>
+          <span className="eyebrow">Minha central</span>
           <h1>Monitorados</h1>
           <p>
             Salve times e jogadores para voltar rapido aos perfis que voce acompanha. Por enquanto, essa lista fica

@@ -23,7 +23,6 @@ function buildStaticPlayerCard(player) {
     name: player.name,
     club: player.club,
     role: player.role,
-    monitoringIndex: Number(player.rating || 0),
     status: player.status || "Monitorado",
     age: player.age || "--",
     foot: player.foot || "--",
@@ -41,7 +40,7 @@ export default function PlayersPage() {
   const [clubFilter, setClubFilter] = useState(ALL_FILTER);
   const [roleFilter, setRoleFilter] = useState(ALL_FILTER);
   const [nationalityFilter, setNationalityFilter] = useState(ALL_FILTER);
-  const [sortMode, setSortMode] = useState("index");
+  const [sortMode, setSortMode] = useState("name");
   const deferredQuery = useDeferredValue(query);
 
   const players = useMemo(
@@ -80,14 +79,18 @@ export default function PlayersPage() {
         }
 
         if (sortMode === "club") {
-          return a.club.localeCompare(b.club) || b.monitoringIndex - a.monitoringIndex;
+          return a.club.localeCompare(b.club) || a.name.localeCompare(b.name);
         }
 
-        return b.monitoringIndex - a.monitoringIndex;
+        if (sortMode === "status") {
+          return a.status.localeCompare(b.status) || a.name.localeCompare(b.name);
+        }
+
+        return a.name.localeCompare(b.name);
       });
   }, [clubFilter, deferredQuery, nationalityFilter, players, roleFilter, sortMode]);
 
-  const topPlayer = [...players].sort((a, b) => b.monitoringIndex - a.monitoringIndex)[0];
+  const latestPlayer = players[0];
   const clubCount = new Set(players.map((player) => player.club)).size;
   const nationalityCount = new Set(players.map((player) => player.nationality)).size;
 
@@ -106,7 +109,7 @@ export default function PlayersPage() {
         <div className="mini-kpis">
           <article className="mini-kpi-card">
             <strong>{players.length}</strong>
-            <span>Atletas no radar</span>
+            <span>Atletas monitorados</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{filteredPlayers.length}</strong>
@@ -176,9 +179,9 @@ export default function PlayersPage() {
           <label>
             Ordenar
             <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-              <option value="index">Maior indice</option>
               <option value="name">Nome</option>
               <option value="club">Clube</option>
+              <option value="status">Status</option>
             </select>
           </label>
         </div>
@@ -186,7 +189,7 @@ export default function PlayersPage() {
         <div className="scout-toolbar two-columns">
           <label>
             Destaque
-            <input value={topPlayer ? `${topPlayer.name} | indice ${topPlayer.monitoringIndex}` : "--"} readOnly />
+            <input value={latestPlayer ? `${latestPlayer.name} | ${latestPlayer.club}` : "--"} readOnly />
           </label>
 
           <label>
@@ -205,7 +208,7 @@ export default function PlayersPage() {
                 <h2>{player.name}</h2>
               </div>
               <div className="result-badge-row">
-                <span className="badge accent">Indice {player.monitoringIndex}</span>
+                <span className="badge accent">{player.status}</span>
                 <span className="badge">{player.source}</span>
               </div>
             </div>

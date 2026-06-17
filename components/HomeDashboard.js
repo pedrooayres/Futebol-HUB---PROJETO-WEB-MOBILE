@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { useAccess } from "@/components/AccessProvider";
 import NewsPanel from "@/components/NewsPanel";
 import StandingsPreview from "@/components/StandingsPreview";
 
@@ -11,58 +10,36 @@ const coreModules = [
   {
     label: "Times",
     title: "Monitoramento de clubes",
-    text: "Acompanhe contexto competitivo, rankings, notícias e leitura recente dos principais times."
+    text: "Acompanhe contexto competitivo, rankings, noticias e leitura recente dos principais times."
   },
   {
     label: "Jogadores",
-    title: "Radar de atletas",
-    text: "Consulte perfis, notícias e sinais de desempenho sem depender de notas manuais."
+    title: "Monitoramento de atletas",
+    text: "Consulte perfis, noticias, clube atual, funcao e sinais publicos de desempenho."
   },
   {
-    label: "Competições",
+    label: "Competicoes",
     title: "Ranking e tabelas",
-    text: "Veja ligas, copas, fases e tabelas em uma experiência direta para acompanhamento diário."
+    text: "Veja ligas, copas, fases e tabelas em uma experiencia direta para acompanhamento diario."
   }
 ];
 
 const workflowSteps = [
-  "Escolha um time, jogador ou competição",
-  "Veja a situação atual com dados e notícias",
+  "Escolha um time, jogador ou competicao",
+  "Veja a situacao atual com dados e noticias",
   "Compare contexto competitivo no ranking",
-  "Volte aos favoritos para acompanhar a evolução"
+  "Salve nos monitorados para acompanhar depois"
 ];
 
 const useCases = [
   "Torcedores que acompanham muitos campeonatos",
-  "Criadores de conteúdo esportivo",
-  "Apostadores que querem contexto público",
-  "Usuários que querem centralizar notícias e tabelas"
+  "Criadores de conteudo esportivo",
+  "Apostadores que querem contexto publico",
+  "Usuarios que querem centralizar noticias e tabelas"
 ];
 
 export default function HomeDashboard() {
-  const { isAdmin } = useAccess();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [backStatus, setBackStatus] = useState("");
   const [footballStatus, setFootballStatus] = useState(null);
-
-  useEffect(() => {
-    async function loadItems() {
-      setLoading(true);
-
-      try {
-        const response = await fetch("/api/scouting");
-        const data = await response.json();
-
-        setItems(data.items || []);
-        setBackStatus(data.message || "");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadItems();
-  }, []);
 
   useEffect(() => {
     async function loadFootballStatus() {
@@ -80,31 +57,29 @@ export default function HomeDashboard() {
 
   const kpis = useMemo(() => {
     return [
-      { label: "Jogadores monitorados", value: String(items.length).padStart(2, "0") },
-      { label: "Competições mapeadas", value: footballStatus?.liveScoreStandingsCompetitions?.length || "--" },
+      { label: "Area de acompanhamento", value: "ON" },
+      { label: "Competicoes mapeadas", value: footballStatus?.liveScoreStandingsCompetitions?.length || "--" },
       { label: "Fonte live", value: footballStatus?.liveScoreConfigured ? "ON" : "OFF" }
     ];
-  }, [footballStatus, items]);
-
-  const recentItems = useMemo(() => items.slice(0, 4), [items]);
+  }, [footballStatus]);
 
   return (
     <main className="page-shell">
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">Futebol HUB Pro</span>
-          <h1>Monitoramento de futebol em um único painel.</h1>
+          <h1>Monitoramento de futebol em um unico painel.</h1>
           <p>
-            Acompanhe times, jogadores, competições, notícias e rankings sem transformar a experiência
-            em uma base manual de scouting.
+            Acompanhe times, jogadores, competicoes, noticias e rankings sem transformar a experiencia
+            em cadastro manual pesado de atletas.
           </p>
 
           <div className="hero-actions">
             <Link href="/ranking" className="primary-button">
               Ver rankings
             </Link>
-            <Link href="/jogadores" className="ghost-button">
-              Monitorar jogadores
+            <Link href="/monitorados" className="ghost-button">
+              Abrir monitorados
             </Link>
           </div>
 
@@ -112,7 +87,7 @@ export default function HomeDashboard() {
             <span>Times</span>
             <span>Jogadores</span>
             <span>Ranking</span>
-            <span>Notícias</span>
+            <span>Noticias</span>
           </div>
         </div>
 
@@ -124,7 +99,7 @@ export default function HomeDashboard() {
             <span className="pitch-dot pitch-dot-two" />
             <span className="pitch-dot pitch-dot-three" />
           </div>
-          <p className="card-label">Visão geral</p>
+          <p className="card-label">Visao geral</p>
           <div className="metric-stack">
             {kpis.map((item) => (
               <div key={item.label} className="metric-card">
@@ -133,7 +108,6 @@ export default function HomeDashboard() {
               </div>
             ))}
           </div>
-          {backStatus ? <p className="warning">{backStatus}</p> : null}
         </aside>
       </section>
 
@@ -169,8 +143,8 @@ export default function HomeDashboard() {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Aplicação</p>
-              <h2>Feito para o usuário final</h2>
+              <p className="panel-tag">Aplicacao</p>
+              <h2>Feito para o usuario final</h2>
             </div>
           </div>
 
@@ -182,8 +156,8 @@ export default function HomeDashboard() {
 
           <p className="warning">
             {footballStatus?.configured
-              ? "Fontes externas conectadas para enriquecer rankings, perfis e notícias."
-              : "Dados ao vivo temporariamente indisponíveis. O painel segue funcionando com a base local."}
+              ? "Fontes externas conectadas para enriquecer rankings, perfis e noticias."
+              : "Dados ao vivo temporariamente indisponiveis. O painel segue funcionando com a base local."}
           </p>
         </article>
       </section>
@@ -194,47 +168,29 @@ export default function HomeDashboard() {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Base recente</p>
-              <h2>Jogadores acompanhados</h2>
+              <p className="panel-tag">Acompanhamento</p>
+              <h2>Central do usuario</h2>
             </div>
-            <span className="badge">{recentItems.length} itens</span>
+            <span className="badge">Monitorados</span>
           </div>
 
-          <div className="note-list">
-            {loading ? <p>Carregando registros...</p> : null}
-
-            {recentItems.map((item) => (
-              <article key={item.objectId} className="note-card">
-                <div className="note-header">
-                  <div>
-                    <h3>{item.playerName}</h3>
-                    <p>
-                      {item.club} | {item.position}
-                    </p>
-                  </div>
-                  <span className={`status-pill ${item.status?.toLowerCase().replaceAll(" ", "-")}`}>
-                    {item.status}
-                  </span>
-                </div>
-                <p className="note-meta">Registro interno de acompanhamento.</p>
-              </article>
-            ))}
-
-            {!loading && recentItems.length === 0 ? (
-              <p>Nenhum jogador interno cadastrado. A área pública segue funcionando com perfis e dados externos.</p>
-            ) : null}
-          </div>
-
-          {isAdmin ? (
-            <Link href="/scouting" className="inline-link">
-              Abrir área interna
+          <p>Salve times, jogadores e competicoes para voltar rapido ao que voce acompanha no dia a dia.</p>
+          <div className="report-link-list">
+            <Link href="/monitorados" className="inline-link">
+              Abrir monitorados
             </Link>
-          ) : null}
+            <Link href="/times" className="inline-link">
+              Ver times
+            </Link>
+            <Link href="/jogadores" className="inline-link">
+              Ver jogadores
+            </Link>
+          </div>
         </article>
       </section>
 
       <section className="professional-grid">
-        <NewsPanel query="futebol OR football transfers OR champions league OR brasileirao" title="Radar de notícias do futebol" />
+        <NewsPanel query="futebol OR football transfers OR champions league OR brasileirao" title="Noticias do futebol" />
 
         <article className="glass-panel">
           <div className="section-heading">
@@ -244,9 +200,9 @@ export default function HomeDashboard() {
             </div>
           </div>
           <ul className="feature-list">
-            <li>API-Football para competições, tabelas, jogos, times e jogadores.</li>
-            <li>GNews para notícias de clubes, ligas, atletas e mercado.</li>
-            <li>Base interna fica reservada para manutenção, sem aparecer como fluxo principal.</li>
+            <li>API-Football para competicoes, tabelas, jogos, times e jogadores.</li>
+            <li>GNews para noticias de clubes, ligas, atletas e mercado.</li>
+            <li>Base local entra como fallback quando uma fonte externa nao estiver disponivel.</li>
           </ul>
         </article>
       </section>

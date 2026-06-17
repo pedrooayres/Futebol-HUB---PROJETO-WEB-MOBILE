@@ -33,8 +33,8 @@ export default function TeamProfileClient({ team }) {
 
         <div className="mini-kpis">
           <article className="mini-kpi-card">
-            <strong>{sportsDbMeta?.formedYear || resolvedTeam.rating}</strong>
-            <span>{sportsDbMeta?.formedYear ? "Fundacao" : "Indice geral"}</span>
+            <strong>{sportsDbMeta?.formedYear || resolvedTeam.league}</strong>
+            <span>{sportsDbMeta?.formedYear ? "Fundacao" : "Competicao"}</span>
           </article>
           <article className="mini-kpi-card">
             <strong>{resolvedTeam.system}</strong>
@@ -78,11 +78,11 @@ export default function TeamProfileClient({ team }) {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Mercado manual</p>
-              <h2>Leitura complementar</h2>
+              <p className="panel-tag">Contexto publico</p>
+              <h2>Atualizacoes complementares</h2>
             </div>
           </div>
-          <p>{resolvedTeam.newsPulse || "Use o modo admin para registrar leitura manual de noticias, valor de mercado e contexto do clube."}</p>
+          <p>{resolvedTeam.newsPulse || "Use o modo admin para registrar noticias, contexto publico e atualizacoes do clube."}</p>
         </article>
       </section>
 
@@ -170,8 +170,8 @@ export default function TeamProfileClient({ team }) {
         <article className="glass-panel">
           <div className="section-heading">
             <div>
-              <p className="panel-tag">Leitura quantitativa</p>
-              <h2>Indices internos</h2>
+              <p className="panel-tag">Indicadores</p>
+              <h2>Perfil competitivo</h2>
             </div>
           </div>
 
@@ -355,8 +355,8 @@ export default function TeamProfileClient({ team }) {
 
         <section className="professional-grid">
           <article className="glass-panel">
-            <p className="panel-tag">Forcas</p>
-            <h2>Pontos de sustentacao</h2>
+            <p className="panel-tag">Caracteristicas</p>
+            <h2>Informacoes principais</h2>
             <ul className="feature-list">
               {resolvedTeam.strengths.map((item) => (
                 <li key={item}>{item}</li>
@@ -365,8 +365,8 @@ export default function TeamProfileClient({ team }) {
           </article>
 
           <article className="glass-panel">
-            <p className="panel-tag">Riscos</p>
-            <h2>Pontos de atencao</h2>
+            <p className="panel-tag">Observacoes</p>
+            <h2>Pontos de acompanhamento</h2>
             <ul className="feature-list">
               {resolvedTeam.risks.map((item) => (
                 <li key={item}>{item}</li>
