@@ -294,10 +294,29 @@ img {
   cursor: pointer;
 }
 
+.search-type-chip span,
+.global-search-group > p span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  min-height: 22px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
 .search-type-chip.active {
   color: #04101b;
   background: var(--accent);
   border-color: transparent;
+}
+
+.search-type-chip.active span {
+  background: rgba(4, 16, 27, 0.12);
+  color: #04101b;
 }
 
 .global-search-group {
@@ -391,6 +410,12 @@ img {
 .global-search-result p {
   color: var(--muted);
   margin: 0;
+}
+
+.search-results-stack,
+.search-result-section {
+  display: grid;
+  gap: 24px;
 }
 
 .nav-link {

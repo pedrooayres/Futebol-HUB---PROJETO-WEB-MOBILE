@@ -5,10 +5,27 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TYPE_FILTERS = ["Todos", "Time", "Jogador", "Competicao"];
+const TYPE_ORDER = ["Time", "Jogador", "Competicao"];
+
+function buildCounts(results = []) {
+  return TYPE_FILTERS.reduce((counts, type) => {
+    counts[type] = type === "Todos" ? results.length : results.filter((item) => item.type === type).length;
+    return counts;
+  }, {});
+}
+
+function buildGroups(results = []) {
+  return TYPE_ORDER.map((type) => ({
+    type,
+    results: results.filter((item) => item.type === type)
+  })).filter((group) => group.results.length > 0);
+}
 
 export default function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [counts, setCounts] = useState(buildCounts());
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeType, setActiveType] = useState("Todos");
   const deferredQuery = useDeferredValue(query);
@@ -18,22 +35,29 @@ export default function GlobalSearch() {
   useEffect(() => {
     if (!deferredQuery.trim()) {
       setResults([]);
+      setCounts(buildCounts());
+      setGroups([]);
       return;
     }
 
     let active = true;
     setLoading(true);
 
-    fetch(`/api/search?q=${encodeURIComponent(deferredQuery)}&limit=10`)
+    fetch(`/api/search?q=${encodeURIComponent(deferredQuery)}&limit=12`)
       .then((response) => response.json())
       .then((data) => {
         if (active) {
-          setResults(data.results || []);
+          const nextResults = data.results || [];
+          setResults(nextResults);
+          setCounts(data.counts || buildCounts(nextResults));
+          setGroups(data.groups || buildGroups(nextResults));
         }
       })
       .catch(() => {
         if (active) {
           setResults([]);
+          setCounts(buildCounts());
+          setGroups([]);
         }
       })
       .finally(() => {
@@ -50,23 +74,18 @@ export default function GlobalSearch() {
   useEffect(() => {
     setQuery("");
     setResults([]);
+    setCounts(buildCounts());
+    setGroups([]);
     setActiveType("Todos");
   }, [pathname]);
 
-  const groupedResults = useMemo(() => {
-    const visibleResults =
-      activeType === "Todos" ? results : results.filter((item) => item.type === activeType);
-
-    return visibleResults.reduce((groups, item) => {
-      const group = item.type || "Outros";
-      groups[group] = groups[group] || [];
-      groups[group].push(item);
-      return groups;
-    }, {});
-  }, [activeType, results]);
+  const groupedResults = useMemo(
+    () => (activeType === "Todos" ? groups : buildGroups(results.filter((item) => item.type === activeType))),
+    [activeType, groups, results]
+  );
 
   const visibleResultsCount = useMemo(
-    () => Object.values(groupedResults).reduce((total, items) => total + items.length, 0),
+    () => groupedResults.reduce((total, group) => total + group.results.length, 0),
     [groupedResults]
   );
 
@@ -104,7 +123,7 @@ export default function GlobalSearch() {
                 className={`search-type-chip ${activeType === type ? "active" : ""}`}
                 onClick={() => setActiveType(type)}
               >
-                {type}
+                {type} <span>{counts[type] || 0}</span>
               </button>
             ))}
           </div>
@@ -112,14 +131,16 @@ export default function GlobalSearch() {
           {loading ? <p>Buscando...</p> : null}
           {!loading && visibleResultsCount === 0 ? <p>Nenhum resultado encontrado.</p> : null}
           {!loading
-            ? Object.entries(groupedResults).map(([group, items]) => (
-                <div key={group} className="global-search-group">
-                  <p>{group}</p>
-                  {items.map((item) => (
+            ? groupedResults.map((group) => (
+                <div key={group.type} className="global-search-group">
+                  <p>
+                    {group.type} <span>{group.results.length}</span>
+                  </p>
+                  {group.results.map((item) => (
                     <Link key={item.id} href={item.href} className="global-search-result">
                       <div className="result-badge-row">
                         <span className="badge accent">{item.type}</span>
-                        <span className="badge">{item.source}</span>
+                        <span className="badge">{item.source || "Base local"}</span>
                       </div>
                       <strong>{item.title}</strong>
                       <small>{item.subtitle}</small>
