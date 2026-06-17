@@ -30,6 +30,7 @@ function buildStaticPlayerCard(player) {
     nationality: player.nationality || "--",
     summary: player.reportSummary || player.summary || "",
     strengths: player.strengths || [],
+    source: player.source || "Base local",
     href: `/jogadores/${player.slug}`
   };
 }
@@ -119,6 +120,10 @@ export default function PlayersPage() {
             <strong>{nationalityCount}</strong>
             <span>Nacionalidades</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>Base local</strong>
+            <span>Fonte dos perfis</span>
+          </article>
         </div>
       </section>
 
@@ -128,7 +133,7 @@ export default function PlayersPage() {
             <p className="panel-tag">Base inicial</p>
             <h2>Filtros e ordenacao</h2>
           </div>
-          <span className="badge">Consulta local</span>
+          <span className="badge">Base local</span>
         </div>
 
         <div className="scout-toolbar four-columns">
@@ -201,6 +206,7 @@ export default function PlayersPage() {
               </div>
               <div className="result-badge-row">
                 <span className="badge accent">Indice {player.monitoringIndex}</span>
+                <span className="badge">{player.source}</span>
               </div>
             </div>
 
@@ -239,7 +245,8 @@ export default function PlayersPage() {
                   title: player.name,
                   meta: player.club,
                   description: `${player.role} | ${player.nationality}`,
-                  href: player.href
+                  href: player.href,
+                  source: player.source
                 }}
               />
               <Link href={player.href} className="inline-link">

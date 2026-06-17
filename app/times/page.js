@@ -13,6 +13,7 @@ export default function TeamsPage() {
   const averageIndex = (
     teams.reduce((sum, team) => sum + team.rating, 0) / teams.length
   ).toFixed(1);
+  const sourceLabel = dataSourceSummary.provider || dataSourceSummary.status || "Base local";
 
   return (
     <main className="page-shell page-stack">
@@ -40,8 +41,8 @@ export default function TeamsPage() {
             <span>Leitura rapida</span>
           </article>
           <article className="mini-kpi-card">
-            <strong>{dataSourceSummary.status}</strong>
-            <span>Base inicial</span>
+            <strong>{sourceLabel}</strong>
+            <span>Fonte dos perfis</span>
           </article>
         </div>
       </section>
@@ -56,6 +57,7 @@ export default function TeamsPage() {
               </div>
               <div className="result-badge-row">
                 <span className="badge accent">Indice {team.rating}</span>
+                <span className="badge">{team.source || sourceLabel}</span>
               </div>
             </div>
 
@@ -90,7 +92,8 @@ export default function TeamsPage() {
                   title: team.name,
                   meta: team.league,
                   description: `${team.system} | ${team.phase}`,
-                  href: `/times/${team.slug}`
+                  href: `/times/${team.slug}`,
+                  source: team.source || sourceLabel
                 }}
               />
               <Link href={`/times/${team.slug}`} className="inline-link">

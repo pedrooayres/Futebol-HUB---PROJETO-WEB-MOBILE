@@ -19,6 +19,18 @@ const TYPE_PLURALS = {
 
 const TYPE_ORDER = ["competition", "team", "player"];
 
+function getItemSource(item) {
+  if (item.source) {
+    return item.source;
+  }
+
+  if (item.type === "competition") {
+    return "Ranking";
+  }
+
+  return "Base local";
+}
+
 export default function MonitoradosWorkspace() {
   const [items, setItems] = useState([]);
   const [typeFilter, setTypeFilter] = useState("Todos");
@@ -85,6 +97,10 @@ export default function MonitoradosWorkspace() {
             <strong>{items.filter((item) => item.type === "competition").length}</strong>
             <span>Competicoes</span>
           </article>
+          <article className="mini-kpi-card">
+            <strong>Local</strong>
+            <span>Lista do navegador</span>
+          </article>
         </div>
       </section>
 
@@ -126,7 +142,10 @@ export default function MonitoradosWorkspace() {
                       <h3>{item.title}</h3>
                       <p>{item.description}</p>
                     </div>
-                    <span className="status-pill">{item.meta || "Monitorado"}</span>
+                    <div className="result-badge-row">
+                      <span className="status-pill">{item.meta || "Monitorado"}</span>
+                      <span className="badge">{getItemSource(item)}</span>
+                    </div>
                   </div>
                   <Link href={item.href} className="inline-link">
                     {item.type === "competition" ? "Abrir ranking" : "Abrir perfil"}
