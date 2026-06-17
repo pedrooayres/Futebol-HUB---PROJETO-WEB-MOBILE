@@ -7,6 +7,11 @@ import {
 } from "@/lib/api-football";
 import { publicErrorMessage } from "@/lib/api-errors";
 import { fallbackStandingsByLeague, featuredTeams } from "@/lib/football-data";
+import {
+  getFootballDataOrgStandings,
+  hasFootballDataOrgToken,
+  supportsFootballDataOrgLeague
+} from "@/lib/football-data-org";
 import { fetchJson } from "@/lib/http-client";
 import { enrichTeamsWithTheSportsDb } from "@/lib/thesportsdb";
 
@@ -758,6 +763,15 @@ export async function GET(request) {
       }
     }
 
+    if (hasFootballDataOrgToken() && supportsFootballDataOrgLeague(leagueId)) {
+      try {
+        const payload = await getFootballDataOrgStandings(leagueId, season);
+        return jsonResponse(await enrichPayloadTeams(payload));
+      } catch (error) {
+        apiFootballError = apiFootballError || error;
+      }
+    }
+
     if (liveScoreConfig?.providerHint === "livescore-api" && liveScoreConfig?.competitionId && hasLiveScoreConfig()) {
       try {
         if (liveScoreConfig.type === "Cup" && view === "knockout") {
@@ -945,7 +959,7 @@ export async function GET(request) {
       charts,
       rows,
       source: "api"
-    });
+    }));
   } catch (error) {
     const fallbackPayload = buildFallbackPayload(leagueId, season);
     return jsonResponse(await enrichPayloadTeams({

@@ -8,3 +8,6 @@ yarn-error.log*
 pnpm-debug.log*
 dist
 coverage
+.vercel
+.env*
+!.env.example

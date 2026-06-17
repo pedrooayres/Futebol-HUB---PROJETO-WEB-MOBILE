@@ -91,6 +91,10 @@ function getSourceLabel(source) {
     return "API-Football";
   }
 
+  if (source === "football-data.org") {
+    return "football-data.org";
+  }
+
   if (source === "api") {
     return "Standings API";
   }
